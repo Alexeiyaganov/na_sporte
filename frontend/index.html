@@ -1,0 +1,460 @@
+<!-- frontend/index.html -->
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SportEvents Map</title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        .app-container {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .app-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .app-header h1 {
+            margin: 0;
+            font-size: 1.5rem;
+        }
+
+        .nav-tabs {
+            display: flex;
+            background: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .tab-button {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            background: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .tab-button.active {
+            background: #007bff;
+            color: white;
+            border-bottom: 3px solid #0056b3;
+        }
+
+        .tab-button:hover:not(.active) {
+            background: #e9ecef;
+        }
+
+        .filters-panel {
+            padding: 15px;
+            background: white;
+            border-bottom: 1px solid #dee2e6;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .filter-select {
+            padding: 8px 12px;
+            border: 1px solid #ced4da;
+            border-radius: 6px;
+            background: white;
+        }
+
+        .location-btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .location-btn:hover {
+            background: #218838;
+        }
+
+        .location-btn:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+        }
+
+        .map-container {
+            flex: 1;
+            min-height: 400px;
+        }
+
+        .event-popup, .user-popup {
+            max-width: 250px;
+        }
+
+        .event-popup h4, .user-popup h4 {
+            margin: 0 0 10px 0;
+            color: #333;
+        }
+
+        .event-popup button, .user-popup button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        .event-popup button:hover, .user-popup button:hover {
+            background: #0056b3;
+        }
+
+        .user-marker {
+            background: none;
+            border: none;
+        }
+
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 200px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <div class="app-container">
+            <header class="app-header">
+                <h1>🏃 SportEvents Map</h1>
+            </header>
+
+            <nav class="nav-tabs">
+                <button
+                    @click="activeTab = 'events'"
+                    :class="{ active: activeTab === 'events' }"
+                    class="tab-button"
+                >
+                    🗓️ Мероприятия
+                </button>
+                <button
+                    @click="activeTab = 'people'"
+                    :class="{ active: activeTab === 'people' }"
+                    class="tab-button"
+                >
+                    👥 Люди рядом
+                </button>
+            </nav>
+
+            <!-- Фильтры для мероприятий -->
+            <div v-if="activeTab === 'events'" class="filters-panel">
+                <select v-model="filters.sport" class="filter-select">
+                    <option value="">Все виды</option>
+                    <option value="бег">🏃 Бег</option>
+                    <option value="велоспорт">🚴 Велоспорт</option>
+                    <option value="лыжи">⛷️ Лыжи</option>
+                    <option value="йога">🧘 Йога</option>
+                    <option value="плавание">🏊 Плавание</option>
+                </select>
+
+                <select v-model="filters.radius" class="filter-select" :disabled="!userLocation">
+                    <option value="5">5 км</option>
+                    <option value="10">10 км</option>
+                    <option value="25">25 км</option>
+                    <option value="50">50 км</option>
+                </select>
+
+                <button @click="shareLocation" class="location-btn">
+                    📍 {{ userLocation ? 'Обновить геолокацию' : 'Мое местоположение' }}
+                </button>
+
+                <span v-if="loading" style="color: #666;">
+                    Загрузка мероприятий...
+                </span>
+            </div>
+
+            <!-- Профиль пользователя для режима "Люди" -->
+            <div v-if="activeTab === 'people'" class="filters-panel">
+                <div v-if="!isSharingLocation">
+                    <input
+                        v-model="userComment"
+                        placeholder="Расскажите о ваших спортивных интересах..."
+                        class="filter-select"
+                        style="min-width: 250px;"
+                    />
+                    <button @click="startSharing" class="location-btn">
+                        👥 Стать видимым
+                    </button>
+                </div>
+                <div v-else>
+                    <span style="color: #28a745;">✔ Вы видимы другим пользователям</span>
+                    <button @click="stopSharing" class="location-btn" style="background: #dc3545;">
+                        ❌ Скрыться
+                    </button>
+                </div>
+            </div>
+
+            <!-- Карта -->
+            <div id="map" class="map-container"></div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        const { createApp, ref, onMounted, computed, watch } = Vue;
+
+        createApp({
+            setup() {
+                const activeTab = ref('events');
+                const events = ref([]);
+                const loading = ref(false);
+                const userLocation = ref(null);
+                const isSharingLocation = ref(false);
+                const userComment = ref('');
+                const map = ref(null);
+                const markers = ref([]);
+
+                const filters = ref({
+                    sport: '',
+                    radius: 10
+                });
+
+                // Загрузка мероприятий
+                const loadEvents = async () => {
+                    loading.value = true;
+                    try {
+                        console.log('Loading events...');
+                        const params = new URLSearchParams();
+                        if (filters.value.sport) params.append('sport', filters.value.sport);
+                        if (userLocation.value) {
+                            params.append('lat', userLocation.value.lat);
+                            params.append('lng', userLocation.value.lng);
+                            params.append('radius', filters.value.radius);
+                        }
+
+                        const response = await fetch(`http://localhost:8001/api/events?${params}`);
+                        if (!response.ok) throw new Error('Network response was not ok');
+
+                        events.value = await response.json();
+                        console.log('Loaded events:', events.value);
+                        updateMapMarkers();
+                    } catch (error) {
+                        console.error('Failed to load events:', error);
+                        // Fallback to mock data
+                        events.value = getMockEvents();
+                        updateMapMarkers();
+                    } finally {
+                        loading.value = false;
+                    }
+                };
+
+                // Инициализация карты
+                const initMap = () => {
+                    console.log('Initializing map...');
+                    map.value = L.map('map').setView([55.7558, 37.6173], 10);
+
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        attribution: '© OpenStreetMap contributors'
+                    }).addTo(map.value);
+
+                    console.log('Map initialized');
+                    loadEvents();
+                };
+
+                // Обновление маркеров на карте
+                const updateMapMarkers = () => {
+                    if (!map.value) return;
+
+                    // Очищаем старые маркеры
+                    markers.value.forEach(marker => {
+                        map.value.removeLayer(marker);
+                    });
+                    markers.value = [];
+
+                    // Добавляем новые маркеры
+                    events.value.forEach(event => {
+                        const marker = L.marker([event.lat, event.lng])
+                            .addTo(map.value)
+                            .bindPopup(`
+                                <div class="event-popup">
+                                    <h4>${event.title}</h4>
+                                    <p>${event.description}</p>
+                                    <p><strong>Спорт:</strong> ${event.sport}</p>
+                                    <p><strong>Дата:</strong> ${event.date}</p>
+                                    <button onclick="alert('Вы присоединились к мероприятию!')">
+                                        Участвовать
+                                    </button>
+                                </div>
+                            `);
+
+                        markers.value.push(marker);
+                    });
+
+                    // Центрируем карту на пользователе если доступно
+                    if (userLocation.value) {
+                        map.value.setView([userLocation.value.lat, userLocation.value.lng], 12);
+                    }
+
+                    console.log(`Added ${markers.value.length} markers to map`);
+                };
+
+                // Запрос геолокации
+                const shareLocation = () => {
+                    if (!navigator.geolocation) {
+                        alert('Геолокация не поддерживается вашим браузером');
+                        return;
+                    }
+
+                    navigator.geolocation.getCurrentPosition(
+                        (position) => {
+                            userLocation.value = {
+                                lat: position.coords.latitude,
+                                lng: position.coords.longitude
+                            };
+                            console.log('User location:', userLocation.value);
+                            loadEvents(); // Перезагружаем события с учетом местоположения
+                            alert('Геолокация обновлена! Карта отцентрирована на вашем местоположении.');
+                        },
+                        (error) => {
+                            console.error('Error getting location:', error);
+                            alert('Не удалось получить геолокацию. Проверьте разрешения в браузере.');
+                        },
+                        {
+                            enableHighAccuracy: true,
+                            timeout: 10000,
+                            maximumAge: 60000
+                        }
+                    );
+                };
+
+                // Функции для режима "Люди"
+                const startSharing = async () => {
+                    if (!navigator.geolocation) {
+                        alert('Геолокация не поддерживается вашим браузером');
+                        return;
+                    }
+
+                    navigator.geolocation.getCurrentPosition(
+                        async (position) => {
+                            const location = {
+                                lat: position.coords.latitude,
+                                lng: position.coords.longitude
+                            };
+
+                            userLocation.value = location;
+                            isSharingLocation.value = true;
+
+                            try {
+                                const response = await fetch('http://localhost:8002/api/users/location', {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                    },
+                                    body: JSON.stringify({
+                                        user_id: 123456789, // demo user ID
+                                        username: 'Demo User',
+                                        lat: location.lat,
+                                        lng: location.lng,
+                                        comment: userComment.value || 'Люблю спорт!',
+                                        sports: ['бег', 'велоспорт']
+                                    })
+                                });
+
+                                if (response.ok) {
+                                    alert('Теперь другие пользователи могут видеть вас на карте!');
+                                } else {
+                                    throw new Error('Failed to update location');
+                                }
+                            } catch (error) {
+                                console.error('Error updating location:', error);
+                                alert('Ошибка при обновлении местоположения на сервере');
+                            }
+                        },
+                        (error) => {
+                            console.error('Error getting location:', error);
+                            alert('Не удалось получить геолокацию');
+                        }
+                    );
+                };
+
+                const stopSharing = () => {
+                    isSharingLocation.value = false;
+                    userLocation.value = null;
+                    alert('Вы больше не видимы другим пользователям');
+                };
+
+                // Mock данные для разработки
+                const getMockEvents = () => {
+                    return [
+                        {
+                            id: 1,
+                            title: "Московский марафон 2024",
+                            description: "Ежегодный осенний марафон через центр Москвы",
+                            sport: "бег",
+                            date: "2024-09-15",
+                            location: "Москва, Воробьевы горы",
+                            lat: 55.710,
+                            lng: 37.553
+                        },
+                        {
+                            id: 2,
+                            title: "Ночной велопробег",
+                            description: "Ночная велопрогулка по освещенным улицам города",
+                            sport: "велоспорт",
+                            date: "2024-10-20",
+                            location: "Москва, Парк Горького",
+                            lat: 55.731,
+                            lng: 37.603
+                        }
+                    ];
+                };
+
+                onMounted(() => {
+                    console.log('App mounted');
+                    initMap();
+                });
+
+                // Наблюдатели для реактивности
+                watch(() => filters.value.sport, loadEvents);
+                watch(() => filters.value.radius, loadEvents);
+                watch(() => activeTab.value, (newTab) => {
+                    if (newTab === 'events') {
+                        loadEvents();
+                    }
+                });
+
+                return {
+                    activeTab,
+                    events,
+                    loading,
+                    userLocation,
+                    isSharingLocation,
+                    userComment,
+                    filters,
+                    loadEvents,
+                    shareLocation,
+                    startSharing,
+                    stopSharing
+                };
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>

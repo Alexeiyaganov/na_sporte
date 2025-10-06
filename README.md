@@ -1,37 +1,27 @@
-┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
-│   Telegram      │    │    API Gateway   │    │   Frontend      │
-│     Bot         │───▶│   (Nginx)        │───▶│  (Vue.js)       │
-└─────────────────┘    └──────────────────┘    └─────────────────┘
-                              │
-              ┌───────────────┼───────────────┐
-              │               │               │
-              ▼               ▼               ▼
-    ┌─────────────────┐ ┌─────────────────┐ ┌─────────────────┐
-    │   Events Service │ │   Users Service │ │   Auth Service  │
-    │   (Python)       │ │   (Python)      │ │   (Python)      │
-    └─────────────────┘ └─────────────────┘ └─────────────────┘
-              │                   │
-              ▼                   ▼
-    ┌─────────────────┐ ┌─────────────────┐
-    │   Redis Cache   │ │   PostgreSQL    │
-    └─────────────────┘ └─────────────────┘
-    
-    
-    2. Структура проекта
-    
-    na sporte/
-├── frontend/                 # Vue.js приложение
+sport-events-app/
+├── frontend/
+│   ├── index.html
 │   ├── src/
+│   │   ├── App.js
+│   │   ├── store.js
+│   │   ├── router.js
 │   │   ├── components/
-│   │   ├── views/
-│   │   ├── stores/
+│   │   │   ├── MapComponent.js
+│   │   │   ├── FilterPanel.js
+│   │   │   └── UserProfile.js
 │   │   └── utils/
-│   └── public/
+│   │       └── geo.js
+│   └── styles/
+│       └── main.css
 ├── backend/
-│   ├── events-service/       # Сервис мероприятий
-│   ├── users-service/        # Сервис пользователей
-│   ├── shared/               # Общие утилиты
-│   └── requirements.txt
-├── nginx/                    # Конфигурация API Gateway
-├── docker-compose.yml
+│   ├── events-service/
+│   │   ├── main.py
+│   │   ├── requirements.txt
+│   │   └── parser.py
+│   ├── users-service/
+│   │   ├── main.py
+│   │   ├── requirements.txt
+│   │   └── database.py
+│   └── shared/
+│       └── config.py
 └── README.md
