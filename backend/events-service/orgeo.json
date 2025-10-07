@@ -1,0 +1,797 @@
+[
+  {
+    "title": "Легкоатлетический кросс студентов среднего профессионального образования города Хабаровска",
+    "date": "01-08.10.2025",
+    "location": "",
+    "url": "https://orgeo.ru/event/46393",
+    "type": "бег",
+    "description": "© 2011-2025 Orgeo – Сервис онлайн-заявок и результатов.",
+    "coordinates": [
+      {
+        "lat": 48.477631,
+        "lng": 135.059448
+      },
+      {
+        "lat": 48.388302,
+        "lng": 135.088318
+      }
+    ],
+    "full_location": "",
+    "organizer": ".bg {visibility:hidden;fill:#1565C0;} .gray_arrow {fill:white} /*##E6E6E6*/ .accent {fill: #d9534f} /*#FF6F00*/ .letters {fill:white} .shadow {visibility:hidden;fill:black;fill-opacity:0.501961}"
+  },
+  {
+    "title": "Беговые сборы в Геленджике",
+    "date": "01-11.10.",
+    "location": "",
+    "url": "https://orgeo.ru/event/45634",
+    "type": "бег",
+    "description": "Скорость, выносливость, лёгкость и энергия.\nТы вернёшься стройнее, сильнее и счастливее — с результатами, которые останутся с тобой надолго.",
+    "coordinates": [],
+    "full_location": "",
+    "organizer": ".bg {visibility:hidden;fill:#1565C0;} .gray_arrow {fill:white} /*##E6E6E6*/ .accent {fill: #d9534f} /*#FF6F00*/ .letters {fill:white} .shadow {visibility:hidden;fill:black;fill-opacity:0.501961}"
+  },
+  {
+    "title": "Gran Fondo Uptrip. Октябрь 2025",
+    "date": "01-31.10.2025",
+    "location": "",
+    "url": "https://orgeo.ru/event/gfu_october25",
+    "type": "велоспорт",
+    "description": "Задача Gran Fondo с Uptrip Октябрь",
+    "coordinates": [
+      {
+        "lat": 43.168556,
+        "lng": 131.91713
+      }
+    ],
+    "full_location": "",
+    "organizer": ".bg {visibility:hidden;fill:#1565C0;} .gray_arrow {fill:white} /*##E6E6E6*/ .accent {fill: #d9534f} /*#FF6F00*/ .letters {fill:white} .shadow {visibility:hidden;fill:black;fill-opacity:0.501961}"
+  },
+  {
+    "title": "Отцы и дети",
+    "date": "07.10.2025 а",
+    "location": "",
+    "url": "https://orgeo.ru/event/46885",
+    "type": "другое",
+    "description": "© 2011-2025 Orgeo – Сервис онлайн-заявок и результатов.",
+    "coordinates": [],
+    "full_location": "",
+    "organizer": ".bg {visibility:hidden;fill:#1565C0;} .gray_arrow {fill:white} /*##E6E6E6*/ .accent {fill: #d9534f} /*#FF6F00*/ .letters {fill:white} .shadow {visibility:hidden;fill:black;fill-opacity:0.501961}"
+  },
+  {
+    "title": "Открытая студенческая Спартакиада \"УниверЛига ДВГАФК-2026",
+    "date": "07.10.",
+    "location": "",
+    "url": "https://orgeo.ru/event/46900",
+    "type": "другое",
+    "description": "© 2011-2025 Orgeo – Сервис онлайн-заявок и результатов.",
+    "coordinates": [
+      {
+        "lat": 48.358021,
+        "lng": 135.119568
+      }
+    ],
+    "full_location": "",
+    "organizer": ".bg {visibility:hidden;fill:#1565C0;} .gray_arrow {fill:white} /*##E6E6E6*/ .accent {fill: #d9534f} /*#FF6F00*/ .letters {fill:white} .shadow {visibility:hidden;fill:black;fill-opacity:0.501961}"
+  },
+  {
+    "title": "Осенний фестиваль Всероссийского физкультурно-спортивного комплекса \"Готов к труду и обороне\"",
+    "date": "07-09.10.2025 а",
+    "location": "",
+    "url": "https://orgeo.ru/event/46422",
+    "type": "фестиваль",
+    "description": "© 2011-2025 Orgeo – Сервис онлайн-заявок и результатов.",
+    "coordinates": [
+      {
+        "lat": 50.88554,
+        "lng": 142.162109
+      }
+    ],
+    "full_location": "",
+    "organizer": ".bg {visibility:hidden;fill:#1565C0;} .gray_arrow {fill:white} /*##E6E6E6*/ .accent {fill: #d9534f} /*#FF6F00*/ .letters {fill:white} .shadow {visibility:hidden;fill:black;fill-opacity:0.501961}"
+  },
+  {
+    "title": "Тренировка кросс-спринт",
+    "date": "07.10.",
+    "location": "",
+    "url": "https://orgeo.ru/event/46955",
+    "type": "бег",
+    "description": "© 2011-2025 Orgeo – Сервис онлайн-заявок и результатов.",
+    "coordinates": [],
+    "full_location": "",
+    "organizer": ".bg {visibility:hidden;fill:#1565C0;} .gray_arrow {fill:white} /*##E6E6E6*/ .accent {fill: #d9534f} /*#FF6F00*/ .letters {fill:white} .shadow {visibility:hidden;fill:black;fill-opacity:0.501961}"
+  },
+  {
+    "title": "«РегиON без_опасности»",
+    "date": "07.10.2025",
+    "location": "",
+    "url": "https://orgeo.ru/event/46973",
+    "type": "другое",
+    "description": "© 2011-2025 Orgeo – Сервис онлайн-заявок и результатов.",
+    "coordinates": [
+      {
+        "lat": 55.115681,
+        "lng": 51.76292
+      },
+      {
+        "lat": 51.76292,
+        "lng": 55.115681
+      }
+    ],
+    "full_location": "",
+    "organizer": ".bg {visibility:hidden;fill:#1565C0;} .gray_arrow {fill:white} /*##E6E6E6*/ .accent {fill: #d9534f} /*#FF6F00*/ .letters {fill:white} .shadow {visibility:hidden;fill:black;fill-opacity:0.501961}"
+  },
+  {
+    "title": "Первенство МОУДО «ДЮЦ «Азимут» по спортивному туризму на пешеходных дистанциях",
+    "date": "07.10.2025",
+    "location": "",
+    "url": "https://orgeo.ru/event/46755",
+    "type": "туризм",
+    "description": "© 2011-2025 Orgeo – Сервис онлайн-заявок и результатов.",
+    "coordinates": [
+      {
+        "lat": 47.920258,
+        "lng": 56.627892
+      },
+      {
+        "lat": 56.627892,
+        "lng": 47.920258
+      }
+    ],
+    "full_location": "",
+    "organizer": ".bg {visibility:hidden;fill:#1565C0;} .gray_arrow {fill:white} /*##E6E6E6*/ .accent {fill: #d9534f} /*#FF6F00*/ .letters {fill:white} .shadow {visibility:hidden;fill:black;fill-opacity:0.501961}"
+  },
+  {
+    "title": "Московский Меридиан (ночные)",
+    "date": "07.10.",
+    "location": "",
+    "url": "https://orgeo.ru/event/44776",
+    "type": "другое",
+    "description": "© 2011-2025 Orgeo – Сервис онлайн-заявок и результатов.",
+    "coordinates": [],
+    "full_location": "",
+    "organizer": ".bg {visibility:hidden;fill:#1565C0;} .gray_arrow {fill:white} /*##E6E6E6*/ .accent {fill: #d9534f} /*#FF6F00*/ .letters {fill:white} .shadow {visibility:hidden;fill:black;fill-opacity:0.501961}"
+  },
+  {
+    "title": "Спринт Тур 2025 5 этап СШ №39",
+    "date": "08.10.2025 ов",
+    "location": "",
+    "url": "https://orgeo.ru/event/46863",
+    "type": "другое",
+    "description": "© 2011-2025 Orgeo – Сервис онлайн-заявок и результатов.",
+    "coordinates": [],
+    "full_location": "",
+    "organizer": ".bg {visibility:hidden;fill:#1565C0;} .gray_arrow {fill:white} /*##E6E6E6*/ .accent {fill: #d9534f} /*#FF6F00*/ .letters {fill:white} .shadow {visibility:hidden;fill:black;fill-opacity:0.501961}"
+  },
+  {
+    "title": "Городские соревнования по спортивному туризму \"Туристская среда шагает по стране\"",
+    "date": "08.10.",
+    "location": "",
+    "url": "https://orgeo.ru/event/42780",
+    "type": "туризм",
+    "description": "© 2011-2025 Orgeo – Сервис онлайн-заявок и результатов.",
+    "coordinates": [],
+    "full_location": "",
+    "organizer": ".bg {visibility:hidden;fill:#1565C0;} .gray_arrow {fill:white} /*##E6E6E6*/ .accent {fill: #d9534f} /*#FF6F00*/ .letters {fill:white} .shadow {visibility:hidden;fill:black;fill-opacity:0.501961}"
+  },
+  {
+    "title": "Dлительная серия осень - этап 1",
+    "date": "08.10.2025 ов",
+    "location": "",
+    "url": "https://orgeo.ru/event/46877",
+    "type": "другое",
+    "description": "© 2011-2025 Orgeo – Сервис онлайн-заявок и результатов.",
+    "coordinates": [],
+    "full_location": "",
+    "organizer": ".bg {visibility:hidden;fill:#1565C0;} .gray_arrow {fill:white} /*##E6E6E6*/ .accent {fill: #d9534f} /*#FF6F00*/ .letters {fill:white} .shadow {visibility:hidden;fill:black;fill-opacity:0.501961}"
+  },
+  {
+    "title": "Среда с КП18",
+    "date": "08.10.2025 а",
+    "location": "",
+    "url": "https://orgeo.ru/event/46921",
+    "type": "другое",
+    "description": "Тренировка по ориентированию. Либо самостоятельно (заданка) либо попробуете походить по азимуту, с объяснением.",
+    "coordinates": [
+      {
+        "lat": 53.166088,
+        "lng": 56.86459
+      },
+      {
+        "lat": 56.86459,
+        "lng": 53.166088
+      }
+    ],
+    "full_location": "",
+    "organizer": ".bg {visibility:hidden;fill:#1565C0;} .gray_arrow {fill:white} /*##E6E6E6*/ .accent {fill: #d9534f} /*#FF6F00*/ .letters {fill:white} .shadow {visibility:hidden;fill:black;fill-opacity:0.501961}"
+  },
+  {
+    "title": "Открытая тренировка по спортивному ориентированию",
+    "date": "08.10.2025 ов",
+    "location": "",
+    "url": "https://orgeo.ru/event/46931",
+    "type": "ориентирование",
+    "description": "© 2011-2025 Orgeo – Сервис онлайн-заявок и результатов.",
+    "coordinates": [],
+    "full_location": "",
+    "organizer": ".bg {visibility:hidden;fill:#1565C0;} .gray_arrow {fill:white} /*##E6E6E6*/ .accent {fill: #d9534f} /*#FF6F00*/ .letters {fill:white} .shadow {visibility:hidden;fill:black;fill-opacity:0.501961}"
+  },
+  {
+    "title": "Спартакиада среди школьных команд муниципальных общеобразовательных учреждений города Ставрополя",
+    "date": "08.10.2025",
+    "location": "",
+    "url": "https://orgeo.ru/event/46211",
+    "type": "другое",
+    "description": "© 2011-2025 Orgeo – Сервис онлайн-заявок и результатов.",
+    "coordinates": [
+      {
+        "lat": 41.926411,
+        "lng": 45.028412
+      },
+      {
+        "lat": 45.028412,
+        "lng": 41.926411
+      }
+    ],
+    "full_location": "",
+    "organizer": ".bg {visibility:hidden;fill:#1565C0;} .gray_arrow {fill:white} /*##E6E6E6*/ .accent {fill: #d9534f} /*#FF6F00*/ .letters {fill:white} .shadow {visibility:hidden;fill:black;fill-opacity:0.501961}"
+  },
+  {
+    "title": "\"Звёздочки 2025\"",
+    "date": "08.10.",
+    "location": "",
+    "url": "https://orgeo.ru/event/46766",
+    "type": "другое",
+    "description": "© 2011-2025 Orgeo – Сервис онлайн-заявок и результатов.",
+    "coordinates": [
+      {
+        "lat": 41.340168,
+        "lng": 56.395145
+      },
+      {
+        "lat": 56.395145,
+        "lng": 41.340168
+      }
+    ],
+    "full_location": "",
+    "organizer": ".bg {visibility:hidden;fill:#1565C0;} .gray_arrow {fill:white} /*##E6E6E6*/ .accent {fill: #d9534f} /*#FF6F00*/ .letters {fill:white} .shadow {visibility:hidden;fill:black;fill-opacity:0.501961}"
+  },
+  {
+    "title": "Кубок первокурсника ИрГУПС, III этап БЛСО",
+    "date": "08.10.2025 ов",
+    "location": "",
+    "url": "https://orgeo.ru/event/46797",
+    "type": "чемпионат",
+    "description": "© 2011-2025 Orgeo – Сервис онлайн-заявок и результатов.",
+    "coordinates": [
+      {
+        "lat": 52.273064,
+        "lng": 104.261108
+      }
+    ],
+    "full_location": "",
+    "organizer": ".bg {visibility:hidden;fill:#1565C0;} .gray_arrow {fill:white} /*##E6E6E6*/ .accent {fill: #d9534f} /*#FF6F00*/ .letters {fill:white} .shadow {visibility:hidden;fill:black;fill-opacity:0.501961}"
+  },
+  {
+    "title": "Кросс",
+    "date": "09.10.2025 ов",
+    "location": "",
+    "url": "https://orgeo.ru/event/46954",
+    "type": "бег",
+    "description": "© 2011-2025 Orgeo – Сервис онлайн-заявок и результатов.",
+    "coordinates": [],
+    "full_location": "",
+    "organizer": ".bg {visibility:hidden;fill:#1565C0;} .gray_arrow {fill:white} /*##E6E6E6*/ .accent {fill: #d9534f} /*#FF6F00*/ .letters {fill:white} .shadow {visibility:hidden;fill:black;fill-opacity:0.501961}"
+  },
+  {
+    "title": "Выполнение нормативов ГТО. Беговые виды + метание",
+    "date": "09.10.2025",
+    "location": "",
+    "url": "https://orgeo.ru/event/46702",
+    "type": "бег",
+    "description": "© 2011-2025 Orgeo – Сервис онлайн-заявок и результатов.",
+    "coordinates": [
+      {
+        "lat": 40.95105,
+        "lng": 57.019432
+      },
+      {
+        "lat": 57.019432,
+        "lng": 40.95105
+      }
+    ],
+    "full_location": "",
+    "organizer": ".bg {visibility:hidden;fill:#1565C0;} .gray_arrow {fill:white} /*##E6E6E6*/ .accent {fill: #d9534f} /*#FF6F00*/ .letters {fill:white} .shadow {visibility:hidden;fill:black;fill-opacity:0.501961}"
+  },
+  {
+    "title": "Контрольный старт (Парголово)",
+    "date": "09.10.",
+    "location": "",
+    "url": "https://orgeo.ru/event/46972",
+    "type": "другое",
+    "description": "© 2011-2025 Orgeo – Сервис онлайн-заявок и результатов.",
+    "coordinates": [],
+    "full_location": "",
+    "organizer": ".bg {visibility:hidden;fill:#1565C0;} .gray_arrow {fill:white} /*##E6E6E6*/ .accent {fill: #d9534f} /*#FF6F00*/ .letters {fill:white} .shadow {visibility:hidden;fill:black;fill-opacity:0.501961}"
+  },
+  {
+    "title": "Чемпионат и Первенство России по ездовому спорту",
+    "date": "09-13.10.2025",
+    "location": "",
+    "url": "https://orgeo.ru/event/45998",
+    "type": "чемпионат",
+    "description": "ВАЖНО: ПРИ ЗАПОЛНЕНИИ ЗАЯВОК УКАЗЫВАЙТЕ РЕГИОН ЗА КОТОРЫЙ ВЫСТУПАЕТЕ НА СОРЕВНОВАНИИ! СВОЙ ДОМАШНИЙ РЕГИОН УКАЗЫВАТЬ НЕ НУЖНО",
+    "coordinates": [
+      {
+        "lat": 41.267372,
+        "lng": 56.223354
+      },
+      {
+        "lat": 56.223354,
+        "lng": 41.267372
+      }
+    ],
+    "full_location": "",
+    "organizer": ".bg {visibility:hidden;fill:#1565C0;} .gray_arrow {fill:white} /*##E6E6E6*/ .accent {fill: #d9534f} /*#FF6F00*/ .letters {fill:white} .shadow {visibility:hidden;fill:black;fill-opacity:0.501961}"
+  },
+  {
+    "title": "Чемпионат и Первенство Краснодарского края по триатлону (дуатлон-кросс)",
+    "date": "09-11.10.2025",
+    "location": "",
+    "url": "https://orgeo.ru/event/46781",
+    "type": "бег",
+    "description": "© 2011-2025 Orgeo – Сервис онлайн-заявок и результатов.",
+    "coordinates": [],
+    "full_location": "",
+    "organizer": ".bg {visibility:hidden;fill:#1565C0;} .gray_arrow {fill:white} /*##E6E6E6*/ .accent {fill: #d9534f} /*#FF6F00*/ .letters {fill:white} .shadow {visibility:hidden;fill:black;fill-opacity:0.501961}"
+  },
+  {
+    "title": "Легкоатлетический кросс ХV комплексной универсиады студентов вузов Хабаровского края и ЕАО",
+    "date": "09-10.10.",
+    "location": "",
+    "url": "https://orgeo.ru/event/46532",
+    "type": "бег",
+    "description": "© 2011-2025 Orgeo – Сервис онлайн-заявок и результатов.",
+    "coordinates": [
+      {
+        "lat": 50.800671,
+        "lng": 134.899139
+      }
+    ],
+    "full_location": "",
+    "organizer": ".bg {visibility:hidden;fill:#1565C0;} .gray_arrow {fill:white} /*##E6E6E6*/ .accent {fill: #d9534f} /*#FF6F00*/ .letters {fill:white} .shadow {visibility:hidden;fill:black;fill-opacity:0.501961}"
+  },
+  {
+    "title": "Соревнования МБУ ДО «Дом детского творчества» по спортивному ориентированию «Белые камушки - 2025»",
+    "date": "09.10.2025 ов",
+    "location": "",
+    "url": "https://orgeo.ru/event/46283",
+    "type": "ориентирование",
+    "description": "© 2011-2025 Orgeo – Сервис онлайн-заявок и результатов.",
+    "coordinates": [
+      {
+        "lat": 53.491913,
+        "lng": 52.860847
+      },
+      {
+        "lat": 52.860847,
+        "lng": 53.491913
+      }
+    ],
+    "full_location": "",
+    "organizer": ".bg {visibility:hidden;fill:#1565C0;} .gray_arrow {fill:white} /*##E6E6E6*/ .accent {fill: #d9534f} /*#FF6F00*/ .letters {fill:white} .shadow {visibility:hidden;fill:black;fill-opacity:0.501961}"
+  },
+  {
+    "title": "Первенство г. Йошкар-Олы по спортивному туризму на пешеходных дистанциях",
+    "date": "09.10.",
+    "location": "",
+    "url": "https://orgeo.ru/event/46807",
+    "type": "туризм",
+    "description": "© 2011-2025 Orgeo – Сервис онлайн-заявок и результатов.",
+    "coordinates": [
+      {
+        "lat": 47.920258,
+        "lng": 56.627892
+      },
+      {
+        "lat": 56.627892,
+        "lng": 47.920258
+      }
+    ],
+    "full_location": "",
+    "organizer": ".bg {visibility:hidden;fill:#1565C0;} .gray_arrow {fill:white} /*##E6E6E6*/ .accent {fill: #d9534f} /*#FF6F00*/ .letters {fill:white} .shadow {visibility:hidden;fill:black;fill-opacity:0.501961}"
+  },
+  {
+    "title": "Московский Меридиан (ночные)",
+    "date": "09.10.",
+    "location": "",
+    "url": "https://orgeo.ru/event/44777",
+    "type": "другое",
+    "description": "© 2011-2025 Orgeo – Сервис онлайн-заявок и результатов.",
+    "coordinates": [],
+    "full_location": "",
+    "organizer": ".bg {visibility:hidden;fill:#1565C0;} .gray_arrow {fill:white} /*##E6E6E6*/ .accent {fill: #d9534f} /*#FF6F00*/ .letters {fill:white} .shadow {visibility:hidden;fill:black;fill-opacity:0.501961}"
+  },
+  {
+    "title": "Кубок Курской области памяти Ю. Волохова",
+    "date": "10-12.10.",
+    "location": "",
+    "url": "https://orgeo.ru/event/46859",
+    "type": "чемпионат",
+    "description": "© 2011-2025 Orgeo – Сервис онлайн-заявок и результатов.",
+    "coordinates": [],
+    "full_location": "",
+    "organizer": ".bg {visibility:hidden;fill:#1565C0;} .gray_arrow {fill:white} /*##E6E6E6*/ .accent {fill: #d9534f} /*#FF6F00*/ .letters {fill:white} .shadow {visibility:hidden;fill:black;fill-opacity:0.501961}"
+  },
+  {
+    "title": "Чемпионат и первенство Северо-Кавказского и Южного федеральных округов по велосипедному спорту",
+    "date": "10-13.10.",
+    "location": "",
+    "url": "https://orgeo.ru/event/46874",
+    "type": "велоспорт",
+    "description": "© 2011-2025 Orgeo – Сервис онлайн-заявок и результатов.",
+    "coordinates": [
+      {
+        "lat": 44.53952789,
+        "lng": 48.74422542
+      },
+      {
+        "lat": 44.547253,
+        "lng": 48.746552
+      },
+      {
+        "lat": 48.746552,
+        "lng": 44.547253
+      },
+      {
+        "lat": 48.739628,
+        "lng": 44.535236
+      }
+    ],
+    "full_location": "",
+    "organizer": ".bg {visibility:hidden;fill:#1565C0;} .gray_arrow {fill:white} /*##E6E6E6*/ .accent {fill: #d9534f} /*#FF6F00*/ .letters {fill:white} .shadow {visibility:hidden;fill:black;fill-opacity:0.501961}"
+  },
+  {
+    "title": "Ночное первенство О-Кунцево",
+    "date": "10.10.",
+    "location": "",
+    "url": "https://orgeo.ru/event/night25",
+    "type": "чемпионат",
+    "description": "Любая сумма станет мотивацией команде делать старты ещё лучше",
+    "coordinates": [],
+    "full_location": "",
+    "organizer": ".bg {visibility:hidden;fill:#1565C0;} .gray_arrow {fill:white} /*##E6E6E6*/ .accent {fill: #d9534f} /*#FF6F00*/ .letters {fill:white} .shadow {visibility:hidden;fill:black;fill-opacity:0.501961}"
+  },
+  {
+    "title": "о проведении открытого Первенства города по СТ на дистанциях на средствах передвижения (вело)",
+    "date": "10-12.10.",
+    "location": "",
+    "url": "https://orgeo.ru/event/46966",
+    "type": "велоспорт",
+    "description": "© 2011-2025 Orgeo – Сервис онлайн-заявок и результатов.",
+    "coordinates": [
+      {
+        "lat": 58.306038,
+        "lng": 51.203503
+      },
+      {
+        "lat": 51.203503,
+        "lng": 58.306038
+      }
+    ],
+    "full_location": "",
+    "organizer": ".bg {visibility:hidden;fill:#1565C0;} .gray_arrow {fill:white} /*##E6E6E6*/ .accent {fill: #d9534f} /*#FF6F00*/ .letters {fill:white} .shadow {visibility:hidden;fill:black;fill-opacity:0.501961}"
+  },
+  {
+    "title": "3 этап Кубка РФСХ по северной ходьбе СВ \"Тебердинская тропа\"",
+    "date": "10-12.10.2025",
+    "location": "",
+    "url": "https://orgeo.ru/event/45945",
+    "type": "другое",
+    "description": "© 2011-2025 Orgeo – Сервис онлайн-заявок и результатов.",
+    "coordinates": [
+      {
+        "lat": 41.729095,
+        "lng": 43.409454
+      },
+      {
+        "lat": 43.409454,
+        "lng": 41.729095
+      }
+    ],
+    "full_location": "",
+    "organizer": ".bg {visibility:hidden;fill:#1565C0;} .gray_arrow {fill:white} /*##E6E6E6*/ .accent {fill: #d9534f} /*#FF6F00*/ .letters {fill:white} .shadow {visibility:hidden;fill:black;fill-opacity:0.501961}"
+  },
+  {
+    "title": "Первенство города Канска по спортивному ориентированию (кроссовые дисциплины) \"Восточный ориентир\"",
+    "date": "10-11.10.2025",
+    "location": "",
+    "url": "https://orgeo.ru/event/46970",
+    "type": "бег",
+    "description": "© 2011-2025 Orgeo – Сервис онлайн-заявок и результатов.",
+    "coordinates": [
+      {
+        "lat": 56.245823,
+        "lng": 95.694862
+      }
+    ],
+    "full_location": "",
+    "organizer": ".bg {visibility:hidden;fill:#1565C0;} .gray_arrow {fill:white} /*##E6E6E6*/ .accent {fill: #d9534f} /*#FF6F00*/ .letters {fill:white} .shadow {visibility:hidden;fill:black;fill-opacity:0.501961}"
+  },
+  {
+    "title": "Жүгіру арқылы спорттық бағдарлаудан аудандық \" Күзгі бағдар 2025\" жарысы",
+    "date": "10.10.",
+    "location": "",
+    "url": "https://orgeo.ru/event/46985",
+    "type": "другое",
+    "description": "© 2011-2025 Orgeo – Сервис онлайн-заявок и результатов.",
+    "coordinates": [
+      {
+        "lat": 50.284256,
+        "lng": 51.087791
+      },
+      {
+        "lat": 51.087791,
+        "lng": 50.284256
+      }
+    ],
+    "full_location": "",
+    "organizer": ".bg {visibility:hidden;fill:#1565C0;} .gray_arrow {fill:white} /*##E6E6E6*/ .accent {fill: #d9534f} /*#FF6F00*/ .letters {fill:white} .shadow {visibility:hidden;fill:black;fill-opacity:0.501961}"
+  },
+  {
+    "title": "Спартакиада школы НОК",
+    "date": "10.10.2025",
+    "location": "",
+    "url": "https://orgeo.ru/event/45459",
+    "type": "другое",
+    "description": "© 2011-2025 Orgeo – Сервис онлайн-заявок и результатов.",
+    "coordinates": [],
+    "full_location": "",
+    "organizer": ".bg {visibility:hidden;fill:#1565C0;} .gray_arrow {fill:white} /*##E6E6E6*/ .accent {fill: #d9534f} /*#FF6F00*/ .letters {fill:white} .shadow {visibility:hidden;fill:black;fill-opacity:0.501961}"
+  },
+  {
+    "title": "Всероссийские соревнования \"Золотая осень\", Кубок КСО Ермак",
+    "date": "10-12.10.",
+    "location": "",
+    "url": "https://orgeo.ru/event/zolotaya_osen",
+    "type": "чемпионат",
+    "description": "© 2011-2025 Orgeo – Сервис онлайн-заявок и результатов.",
+    "coordinates": [
+      {
+        "lat": 65.522331,
+        "lng": 57.145901
+      },
+      {
+        "lat": 57.145901,
+        "lng": 65.522331
+      }
+    ],
+    "full_location": "",
+    "organizer": ".bg {visibility:hidden;fill:#1565C0;} .gray_arrow {fill:white} /*##E6E6E6*/ .accent {fill: #d9534f} /*#FF6F00*/ .letters {fill:white} .shadow {visibility:hidden;fill:black;fill-opacity:0.501961}"
+  },
+  {
+    "title": "Первенство округа Муром по осеннему легкоатлетическому кроссу, памяти ОЧ и ЧМ Алексея Прокуророва",
+    "date": "10.10.2025 ов",
+    "location": "",
+    "url": "https://orgeo.ru/event/46537",
+    "type": "бег",
+    "description": "ОКОНЧАТЕЛЬНЫЙ РЕГЛАМЕНТ ПУБЛИКУЕТСЯ В ОФИЦИАЛЬНЫХ СООБЩЕСТВАХ МЕРОПРИЯТИЯ НЕ ПОЗДНЕЕ ЧЕМ ЗА 1 СУТКИ ДО СОРЕВНОВАНИЯОКОНЧАТЕЛЬНЫЙ РЕГЛАМЕНТ ПУБЛИКУЕТСЯ В ОФИЦИАЛЬНЫХ СООБЩЕСТВАХ МЕРОПРИЯТИЯ НЕ ПОЗДНЕЕ ЧЕМ ЗА 1 СУТКИ ДО СОРЕВНОВАНИЯ",
+    "coordinates": [
+      {
+        "lat": 41.95998,
+        "lng": 55.521145
+      },
+      {
+        "lat": 55.521145,
+        "lng": 41.95998
+      }
+    ],
+    "full_location": "",
+    "organizer": ".bg {visibility:hidden;fill:#1565C0;} .gray_arrow {fill:white} /*##E6E6E6*/ .accent {fill: #d9534f} /*#FF6F00*/ .letters {fill:white} .shadow {visibility:hidden;fill:black;fill-opacity:0.501961}"
+  },
+  {
+    "title": "Первенство города Оренбурга по спортивному ориентированию",
+    "date": "10-11.10.",
+    "location": "",
+    "url": "https://orgeo.ru/event/46547",
+    "type": "ориентирование",
+    "description": "При подаче в ОДНОЙ заявке от 10 чел. – скидка 10%.",
+    "coordinates": [
+      {
+        "lat": 55.191902,
+        "lng": 51.779369
+      },
+      {
+        "lat": 51.779369,
+        "lng": 55.191902
+      }
+    ],
+    "full_location": "",
+    "organizer": ".bg {visibility:hidden;fill:#1565C0;} .gray_arrow {fill:white} /*##E6E6E6*/ .accent {fill: #d9534f} /*#FF6F00*/ .letters {fill:white} .shadow {visibility:hidden;fill:black;fill-opacity:0.501961}"
+  },
+  {
+    "title": "ЗОЛОТАЯ ОСЕНЬ. Открытое Первенство города Брянска",
+    "date": "10.10.2025 ов",
+    "location": "",
+    "url": "https://orgeo.ru/event/46306",
+    "type": "чемпионат",
+    "description": "© 2011-2025 Orgeo – Сервис онлайн-заявок и результатов.",
+    "coordinates": [],
+    "full_location": "",
+    "organizer": ".bg {visibility:hidden;fill:#1565C0;} .gray_arrow {fill:white} /*##E6E6E6*/ .accent {fill: #d9534f} /*#FF6F00*/ .letters {fill:white} .shadow {visibility:hidden;fill:black;fill-opacity:0.501961}"
+  },
+  {
+    "title": "Чемпионат, Первенство и Соревнования МО г.Армавира по спортивному туризму на пешеходных дистанциях",
+    "date": "10-12.10.2025",
+    "location": "",
+    "url": "https://orgeo.ru/event/45803",
+    "type": "туризм",
+    "description": "Условия дистанций и остальная документация расположены:",
+    "coordinates": [
+      {
+        "lat": 41.149746,
+        "lng": 44.922729
+      },
+      {
+        "lat": 44.922729,
+        "lng": 41.149746
+      }
+    ],
+    "full_location": "",
+    "organizer": ".bg {visibility:hidden;fill:#1565C0;} .gray_arrow {fill:white} /*##E6E6E6*/ .accent {fill: #d9534f} /*#FF6F00*/ .letters {fill:white} .shadow {visibility:hidden;fill:black;fill-opacity:0.501961}"
+  },
+  {
+    "title": "ОБЛАСТНЫЕ СОРЕВНОВАНИЯХ ПО СПОРТИВНОМУ ТУРИЗМУ НА ПЕШЕХОДНЫХ ДИСТАНЦИЯХ «ОСЕННЯЯ ТРОПА»",
+    "date": "10.10.2025 ов",
+    "location": "",
+    "url": "https://orgeo.ru/event/46590",
+    "type": "туризм",
+    "description": "© 2011-2025 Orgeo – Сервис онлайн-заявок и результатов.",
+    "coordinates": [],
+    "full_location": "",
+    "organizer": ".bg {visibility:hidden;fill:#1565C0;} .gray_arrow {fill:white} /*##E6E6E6*/ .accent {fill: #d9534f} /*#FF6F00*/ .letters {fill:white} .shadow {visibility:hidden;fill:black;fill-opacity:0.501961}"
+  },
+  {
+    "title": "ОБЛАСТНЫЕ СОРЕВНОВАНИЯХ ПО СПОРТИВНОМУ ТУРИЗМУ НА ПЕШЕХОДНЫХ ДИСТАНЦИЯХ \"ОСЕННЯЯ ТРОПА\"",
+    "date": "10.10.2025 ов",
+    "location": "",
+    "url": "https://orgeo.ru/event/46591",
+    "type": "туризм",
+    "description": "© 2011-2025 Orgeo – Сервис онлайн-заявок и результатов.",
+    "coordinates": [],
+    "full_location": "",
+    "organizer": ".bg {visibility:hidden;fill:#1565C0;} .gray_arrow {fill:white} /*##E6E6E6*/ .accent {fill: #d9534f} /*#FF6F00*/ .letters {fill:white} .shadow {visibility:hidden;fill:black;fill-opacity:0.501961}"
+  },
+  {
+    "title": "Первенство города Ельца по спортивному туризму (дистанция пешеходная (короткая(спринт))",
+    "date": "11.10.2025",
+    "location": "",
+    "url": "https://orgeo.ru/event/46852",
+    "type": "туризм",
+    "description": "© 2011-2025 Orgeo – Сервис онлайн-заявок и результатов.",
+    "coordinates": [],
+    "full_location": "",
+    "organizer": ".bg {visibility:hidden;fill:#1565C0;} .gray_arrow {fill:white} /*##E6E6E6*/ .accent {fill: #d9534f} /*#FF6F00*/ .letters {fill:white} .shadow {visibility:hidden;fill:black;fill-opacity:0.501961}"
+  },
+  {
+    "title": "Областные соревнования Свердловской области",
+    "date": "11-12.10.2025",
+    "location": "",
+    "url": "https://orgeo.ru/event/46854",
+    "type": "другое",
+    "description": "© 2011-2025 Orgeo – Сервис онлайн-заявок и результатов.",
+    "coordinates": [
+      {
+        "lat": 60.347023,
+        "lng": 56.941536
+      },
+      {
+        "lat": 56.941536,
+        "lng": 60.347023
+      }
+    ],
+    "full_location": "",
+    "organizer": ".bg {visibility:hidden;fill:#1565C0;} .gray_arrow {fill:white} /*##E6E6E6*/ .accent {fill: #d9534f} /*#FF6F00*/ .letters {fill:white} .shadow {visibility:hidden;fill:black;fill-opacity:0.501961}"
+  },
+  {
+    "title": "Чемпионат и Первенство Республики Бурятия по спортивному ориентированию. \"Гонка Сильнейших-2025\"",
+    "date": "11.10.2025 а",
+    "location": "",
+    "url": "https://orgeo.ru/event/46607",
+    "type": "ориентирование",
+    "description": "© 2011-2025 Orgeo – Сервис онлайн-заявок и результатов.",
+    "coordinates": [
+      {
+        "lat": 52.000957,
+        "lng": 106.881325
+      }
+    ],
+    "full_location": "",
+    "organizer": ".bg {visibility:hidden;fill:#1565C0;} .gray_arrow {fill:white} /*##E6E6E6*/ .accent {fill: #d9534f} /*#FF6F00*/ .letters {fill:white} .shadow {visibility:hidden;fill:black;fill-opacity:0.501961}"
+  },
+  {
+    "title": "Фестиваль спортивного ориентирования \"Золотая осень\"",
+    "date": "11.10.2025",
+    "location": "",
+    "url": "https://orgeo.ru/event/zolotaya_osen_2025",
+    "type": "ориентирование",
+    "description": "При регистрации в младшие группы будьте внимательны. Они отличаются от стандартных.",
+    "coordinates": [],
+    "full_location": "",
+    "organizer": ".bg {visibility:hidden;fill:#1565C0;} .gray_arrow {fill:white} /*##E6E6E6*/ .accent {fill: #d9534f} /*#FF6F00*/ .letters {fill:white} .shadow {visibility:hidden;fill:black;fill-opacity:0.501961}"
+  },
+  {
+    "title": "Первенство Астраханской области в дисциплине «дистанция пешеходная »",
+    "date": "11-12.10.2025",
+    "location": "",
+    "url": "https://orgeo.ru/event/45086",
+    "type": "чемпионат",
+    "description": "© 2011-2025 Orgeo – Сервис онлайн-заявок и результатов.",
+    "coordinates": [
+      {
+        "lat": 48.14524469,
+        "lng": 46.37172018
+      },
+      {
+        "lat": 48.136875,
+        "lng": 46.368557
+      },
+      {
+        "lat": 46.368557,
+        "lng": 48.136875
+      },
+      {
+        "lat": 46.373695,
+        "lng": 48.155331
+      }
+    ],
+    "full_location": "",
+    "organizer": ".bg {visibility:hidden;fill:#1565C0;} .gray_arrow {fill:white} /*##E6E6E6*/ .accent {fill: #d9534f} /*#FF6F00*/ .letters {fill:white} .shadow {visibility:hidden;fill:black;fill-opacity:0.501961}"
+  },
+  {
+    "title": "Краевой фестиваль по триатлону «Партизанский спринт»",
+    "date": "11.10.2025 ов",
+    "location": "",
+    "url": "https://orgeo.ru/event/46367",
+    "type": "триатлон",
+    "description": "© 2011-2025 Orgeo – Сервис онлайн-заявок и результатов.",
+    "coordinates": [
+      {
+        "lat": 43.06073,
+        "lng": 133.128159
+      }
+    ],
+    "full_location": "",
+    "organizer": ".bg {visibility:hidden;fill:#1565C0;} .gray_arrow {fill:white} /*##E6E6E6*/ .accent {fill: #d9534f} /*#FF6F00*/ .letters {fill:white} .shadow {visibility:hidden;fill:black;fill-opacity:0.501961}"
+  },
+  {
+    "title": "Кубок Синтала - 2025. Этап 4",
+    "date": "11.10.",
+    "location": "",
+    "url": "https://orgeo.ru/event/46371",
+    "type": "чемпионат",
+    "description": "© 2011-2025 Orgeo – Сервис онлайн-заявок и результатов.",
+    "coordinates": [
+      {
+        "lat": 40.32428,
+        "lng": 54.826401
+      },
+      {
+        "lat": 54.826401,
+        "lng": 40.32428
+      }
+    ],
+    "full_location": "",
+    "organizer": ".bg {visibility:hidden;fill:#1565C0;} .gray_arrow {fill:white} /*##E6E6E6*/ .accent {fill: #d9534f} /*#FF6F00*/ .letters {fill:white} .shadow {visibility:hidden;fill:black;fill-opacity:0.501961}"
+  },
+  {
+    "title": "Межрегиональные соревнования по спортивному ориентированию \"Осенние старты\"",
+    "date": "11.10.2025",
+    "location": "",
+    "url": "https://orgeo.ru/event/46627",
+    "type": "ориентирование",
+    "description": "© 2011-2025 Orgeo – Сервис онлайн-заявок и результатов.",
+    "coordinates": [],
+    "full_location": "",
+    "organizer": ".bg {visibility:hidden;fill:#1565C0;} .gray_arrow {fill:white} /*##E6E6E6*/ .accent {fill: #d9534f} /*#FF6F00*/ .letters {fill:white} .shadow {visibility:hidden;fill:black;fill-opacity:0.501961}"
+  }
+]

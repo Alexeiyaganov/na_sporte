@@ -1,7 +1,6 @@
-# backend/events-service/main.py
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from datetime import datetime
+import os
 import logging
 
 logging.basicConfig(level=logging.INFO)
@@ -28,19 +27,18 @@ MOCK_EVENTS = [
         "description": "Ночная велопрогулка по освещенным улицам города",
         "date": "2024-10-20", "location": "Москва, Парк Горького",
         "lat": 55.731, "lng": 37.603
-    },
-    {
-        "id": 3, "title": "Открытие лыжного сезона", "sport": "лыжи",
-        "description": "Групповая лыжная прогулка с инструкторами",
-        "date": "2024-12-10", "location": "Москва, Крылатское",
-        "lat": 55.756, "lng": 37.438
     }
 ]
 
 
 @app.get("/")
 async def root():
-    return {"message": "Events Service is running"}
+    return {"message": "Events Service is running on Railway"}
+
+
+@app.get("/health")
+async def health():
+    return {"status": "healthy", "service": "events"}
 
 
 @app.get("/api/events")
@@ -63,4 +61,5 @@ def calculate_distance(lat1: float, lon1: float, lat2: float, lon2: float) -> fl
 if __name__ == "__main__":
     import uvicorn
 
-    uvicorn.run("main:app", host="0.0.0.0", port=8001, reload=True)
+    port = int(os.environ.get("PORT", 8000))
+    uvicorn.run(app, host="0.0.0.0", port=port)

@@ -1,4 +1,4 @@
-# telegram-bot/bot.py
+import os
 import logging
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, WebAppInfo
 from telegram.ext import Application, CommandHandler, CallbackQueryHandler, ContextTypes
@@ -6,8 +6,11 @@ from telegram.ext import Application, CommandHandler, CallbackQueryHandler, Cont
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-BOT_TOKEN = "7564444541:AAF4H4vv1m7JwE24v5Cqwe9SpQniZvUg8bo"
-WEB_APP_URL = "https://alexeiyaganov.github.io/na_sporte/"  # ЗАМЕНИТЕ НА СВОЙ URL
+# Токен берется из переменных окружения Railway
+BOT_TOKEN = os.environ.get("BOT_TOKEN", "7564444541:AAF4H4vv1m7JwE24v5Cqwe9SpQniZvUg8bo")
+
+# ЗАМЕНИТЕ НА ВАШ РЕАЛЬНЫЙ URL GitHub Pages
+WEB_APP_URL = "https://alexeiyaganov.github.io/na_sporte/"
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -51,38 +54,26 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
 
 
-async def events_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    keyboard = [[InlineKeyboardButton(
-        "🔍 Открыть поиск мероприятий",
-        web_app=WebAppInfo(url=f"{WEB_APP_URL}?mode=events")
-    )]]
-    await update.message.reply_text(
-        "Открываю поиск мероприятий...",
-        reply_markup=InlineKeyboardMarkup(keyboard)
-    )
-
-
-async def people_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    keyboard = [[InlineKeyboardButton(
-        "👥 Открыть поиск напарников",
-        web_app=WebAppInfo(url=f"{WEB_APP_URL}?mode=people")
-    )]]
-    await update.message.reply_text(
-        "Открываю поиск напарников...",
-        reply_markup=InlineKeyboardMarkup(keyboard)
-    )
-
-
 def main():
     application = Application.builder().token(BOT_TOKEN).build()
 
     application.add_handler(CommandHandler("start", start))
-    application.add_handler(CommandHandler("events", events_command))
-    application.add_handler(CommandHandler("people", people_command))
     application.add_handler(CallbackQueryHandler(button_handler))
 
-    logger.info("Бот запущен...")
-    application.run_polling()
+    # Для Railway используем webhook
+    if 'RAILWAY_STATIC_URL' in os.environ:
+        logger.info("Running on Railway with webhook")
+        port = int(os.environ.get("PORT", 8000))
+        application.run_webhook(
+            listen="0.0.0.0",
+            port=port,
+            webhook_url=os.environ.get('RAILWAY_STATIC_URL', ''),
+            secret_token='webhook_secret'
+        )
+    else:
+        # Локальная разработка
+        logger.info("Running locally with polling")
+        application.run_polling()
 
 
 if __name__ == "__main__":
