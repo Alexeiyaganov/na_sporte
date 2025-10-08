@@ -56,6 +56,9 @@
                 const markers = ref([]);
                 const telegramUser = ref(null);
 
+                // ✅ ДОБАВЛЕНО: URL бэкенда на PythonAnywhere
+                const BACKEND_URL = "https://skienbear.pythonanywhere.com";
+
                 const eventFilters = ref({ sport: '', radius: 10 });
                 const peopleFilters = ref({ sport: '', radius: 5 });
 
@@ -87,10 +90,17 @@
                             params.append('radius', eventFilters.value.radius);
                         }
 
-                        const response = await fetch(`http://localhost:8001/api/events?${params}`);
-                        if (!response.ok) throw new Error('Network response was not ok');
+                        // ✅ ИЗМЕНЕНО: Используем PythonAnywhere бэкенд
+                        const response = await fetch(`${BACKEND_URL}/api/events?${params}`);
 
-                        events.value = await response.json();
+                        // ✅ ИЗМЕНЕНО: Обработка ответа Flask
+                        const result = await response.json();
+                        if (result.status === "success") {
+                            events.value = result.data;
+                        } else {
+                            throw new Error(result.message || 'Failed to load events');
+                        }
+
                         console.log('Loaded events:', events.value);
                         updateMapMarkers();
                     } catch (error) {
@@ -124,11 +134,15 @@
                             params.append('sport', peopleFilters.value.sport);
                         }
 
-                        const response = await fetch(`http://localhost:8002/api/users/nearby?${params}`);
-                        if (response.ok) {
-                            nearbyUsers.value = await response.json();
+                        // ✅ ИЗМЕНЕНО: Используем PythonAnywhere бэкенд
+                        const response = await fetch(`${BACKEND_URL}/api/users/nearby?${params}`);
+
+                        // ✅ ИЗМЕНЕНО: Обработка ответа Flask
+                        const result = await response.json();
+                        if (result.status === "success") {
+                            nearbyUsers.value = result.data;
                         } else {
-                            throw new Error('Failed to load users');
+                            throw new Error(result.message || 'Failed to load users');
                         }
 
                         console.log('Loaded nearby users:', nearbyUsers.value);
@@ -284,7 +298,8 @@
 
                         // Save to server
                         if (telegramUser.value) {
-                            const response = await fetch('http://localhost:8002/api/users/location', {
+                            // ✅ ИЗМЕНЕНО: Используем PythonAnywhere бэкенд
+                            const response = await fetch(`${BACKEND_URL}/api/users/location`, {
                                 method: 'POST',
                                 headers: {
                                     'Content-Type': 'application/json',
@@ -299,15 +314,17 @@
                                 })
                             });
 
-                            if (response.ok) {
+                            // ✅ ИЗМЕНЕНО: Обработка ответа Flask
+                            const result = await response.json();
+                            if (result.status === "success") {
                                 alert('✅ Теперь другие пользователи могут видеть вас на карте!');
                             } else {
-                                throw new Error('Failed to update location');
+                                throw new Error(result.message || 'Failed to update location');
                             }
                         }
                     } catch (error) {
                         console.error('Error sharing location:', error);
-                        alert('❌ Не удалось поделиться местоположением');
+                        alert('❌ Не удалось поделиться местоположением: ' + error.message);
                     }
                 };
 

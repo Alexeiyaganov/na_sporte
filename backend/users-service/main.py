@@ -85,4 +85,5 @@ def calculate_distance(lat1: float, lon1: float, lat2: float, lon2: float) -> fl
 if __name__ == "__main__":
     import uvicorn
 
-    uvicorn.run("main:app", host="0.0.0.0", port=8002, reload=True)
+    port = int(os.environ.get("PORT", 8080))  # Fly.io использует 8080
+    uvicorn.run(app, host="0.0.0.0", port=port)

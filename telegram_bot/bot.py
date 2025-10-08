@@ -6,11 +6,8 @@ from telegram.ext import Application, CommandHandler, CallbackQueryHandler, Cont
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Токен берется из переменных окружения Railway
 BOT_TOKEN = os.environ.get("BOT_TOKEN", "7564444541:AAF4H4vv1m7JwE24v5Cqwe9SpQniZvUg8bo")
-
-# ЗАМЕНИТЕ НА ВАШ РЕАЛЬНЫЙ URL GitHub Pages
-WEB_APP_URL = "https://alexeiyaganov.github.io/na_sporte/"
+WEB_APP_URL = "https://вашusername.github.io/вашрепозиторий"  # ЗАМЕНИТЕ
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -60,15 +57,15 @@ def main():
     application.add_handler(CommandHandler("start", start))
     application.add_handler(CallbackQueryHandler(button_handler))
 
-    # Для Railway используем webhook
-    if 'RAILWAY_STATIC_URL' in os.environ:
-        logger.info("Running on Railway with webhook")
-        port = int(os.environ.get("PORT", 8000))
+    # Для продакшена используем webhook
+    if 'FLY_APP_NAME' in os.environ:
+        logger.info("Running on Fly.io with webhook")
+        port = int(os.environ.get("PORT", 8080))
+        app_name = os.environ.get('FLY_APP_NAME')
         application.run_webhook(
             listen="0.0.0.0",
             port=port,
-            webhook_url=os.environ.get('RAILWAY_STATIC_URL', ''),
-            secret_token='webhook_secret'
+            webhook_url=f"https://{app_name}.fly.dev"
         )
     else:
         # Локальная разработка

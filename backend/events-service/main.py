@@ -33,7 +33,7 @@ MOCK_EVENTS = [
 
 @app.get("/")
 async def root():
-    return {"message": "Events Service is running on Railway"}
+    return {"message": "Events Service is running on Fly.io"}
 
 
 @app.get("/health")
@@ -61,5 +61,5 @@ def calculate_distance(lat1: float, lon1: float, lat2: float, lon2: float) -> fl
 if __name__ == "__main__":
     import uvicorn
 
-    port = int(os.environ.get("PORT", 8000))
+    port = int(os.environ.get("PORT", 8080))  # Fly.io использует 8080
     uvicorn.run(app, host="0.0.0.0", port=port)
