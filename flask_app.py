@@ -16,6 +16,7 @@ CORS(app)
 users_storage = {}
 trainings_storage = {}
 training_participants = {}
+user_locations = {}
 
 # Mock данные мероприятий
 MOCK_EVENTS = [
@@ -197,6 +198,18 @@ def get_training_participants(training_id):
     """Получить список участников тренировки"""
     try:
         participants = training_participants.get(training_id, [])
+
+        # Добавляем текущие локации участников
+        for participant in participants:
+            user_id = participant['user_id']
+            if user_id in user_locations:
+                location_data = user_locations[user_id]
+                if datetime.now() - location_data['last_updated'] < timedelta(minutes=10):  # Только свежие локации
+                    participant['current_location'] = {
+                        'lat': location_data['lat'],
+                        'lng': location_data['lng']
+                    }
+
         return jsonify({"status": "success", "data": participants})
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
@@ -208,13 +221,11 @@ def update_user_location():
     try:
         data = request.get_json()
 
-        users_storage[data['user_id']] = {
+        user_locations[data['user_id']] = {
             "user_id": data['user_id'],
-            "username": data.get('username'),
             "lat": data['lat'],
             "lng": data['lng'],
-            "is_visible": True,
-            "last_seen": datetime.now().isoformat()
+            "last_updated": datetime.now()
         }
 
         return jsonify({"status": "success", "message": "Location updated"})
