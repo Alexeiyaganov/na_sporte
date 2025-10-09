@@ -122,6 +122,23 @@ def create_training():
     """Создать новую тренировку"""
     try:
         data = request.get_json()
+
+        # Валидация данных
+        if not data.get('user_id'):
+            return jsonify({"status": "error", "message": "User ID is required"}), 400
+
+        if not data.get('title'):
+            return jsonify({"status": "error", "message": "Title is required"}), 400
+
+        if not data.get('sport'):
+            return jsonify({"status": "error", "message": "Sport is required"}), 400
+
+        if not data.get('lat') or not data.get('lng'):
+            return jsonify({"status": "error", "message": "Location coordinates are required"}), 400
+
+        if not data.get('start_time'):
+            return jsonify({"status": "error", "message": "Start time is required"}), 400
+
         training_id = f"training_{datetime.now().timestamp()}"
 
         training_data = {
@@ -147,8 +164,16 @@ def create_training():
         # Автоматически добавляем создателя как участника
         join_training(training_id, data['user_id'], data['user_name'], data.get('user_photo'))
 
-        return jsonify({"status": "success", "training_id": training_id})
+        logger.info(f"Training created: {training_id} by user {data['user_id']}")
+
+        return jsonify({
+            "status": "success",
+            "training_id": training_id,
+            "message": "Training created successfully"
+        })
+
     except Exception as e:
+        logger.error(f"Error creating training: {str(e)}")
         return jsonify({"status": "error", "message": str(e)}), 500
 
 
