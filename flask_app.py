@@ -13,7 +13,6 @@ app = Flask(__name__)
 CORS(app)
 
 # Хранилища данных
-users_storage = {}
 trainings_storage = {}
 training_participants = {}
 user_locations = {}
@@ -122,24 +121,15 @@ def create_training():
     """Создать новую тренировку"""
     try:
         data = request.get_json()
+        print("Received training data:", data)
 
         # Валидация данных
-        if not data.get('user_id'):
-            return jsonify({"status": "error", "message": "User ID is required"}), 400
+        required_fields = ['user_id', 'title', 'sport', 'lat', 'lng', 'start_time']
+        for field in required_fields:
+            if not data.get(field):
+                return jsonify({"status": "error", "message": f"Missing required field: {field}"}), 400
 
-        if not data.get('title'):
-            return jsonify({"status": "error", "message": "Title is required"}), 400
-
-        if not data.get('sport'):
-            return jsonify({"status": "error", "message": "Sport is required"}), 400
-
-        if not data.get('lat') or not data.get('lng'):
-            return jsonify({"status": "error", "message": "Location coordinates are required"}), 400
-
-        if not data.get('start_time'):
-            return jsonify({"status": "error", "message": "Start time is required"}), 400
-
-        training_id = f"training_{datetime.now().timestamp()}"
+        training_id = f"training_{int(datetime.now().timestamp())}"
 
         training_data = {
             "id": training_id,
@@ -147,8 +137,8 @@ def create_training():
             "title": data['title'],
             "description": data.get('description', ''),
             "sport": data['sport'],
-            "lat": data['lat'],
-            "lng": data['lng'],
+            "lat": float(data['lat']),
+            "lng": float(data['lng']),
             "start_time": data['start_time'],
             "end_time": data.get('end_time'),
             "comment": data.get('comment', ''),
@@ -164,17 +154,18 @@ def create_training():
         # Автоматически добавляем создателя как участника
         join_training(training_id, data['user_id'], data['user_name'], data.get('user_photo'))
 
-        logger.info(f"Training created: {training_id} by user {data['user_id']}")
+        logger.info(f"Training created successfully: {training_id}")
 
         return jsonify({
             "status": "success",
             "training_id": training_id,
-            "message": "Training created successfully"
+            "message": "Training created successfully",
+            "data": training_data
         })
 
     except Exception as e:
         logger.error(f"Error creating training: {str(e)}")
-        return jsonify({"status": "error", "message": str(e)}), 500
+        return jsonify({"status": "error", "message": f"Server error: {str(e)}"}), 500
 
 
 @app.route('/api/trainings/<training_id>/join', methods=['POST'])
@@ -193,8 +184,7 @@ def join_training_endpoint(training_id):
             join_training(training_id, data['user_id'], data['user_name'], data.get('user_photo'))
             return jsonify({"status": "success", "message": "Вы присоединились к тренировке"})
         else:
-            # Здесь можно добавить логику запроса подтверждения
-            return jsonify({"status": "success", "message": "Запрос на участие отправлен"})
+            return jsonify({"status": "success", "message": "Запрос на участие отправлен организатору"})
 
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
@@ -223,18 +213,6 @@ def get_training_participants(training_id):
     """Получить список участников тренировки"""
     try:
         participants = training_participants.get(training_id, [])
-
-        # Добавляем текущие локации участников
-        for participant in participants:
-            user_id = participant['user_id']
-            if user_id in user_locations:
-                location_data = user_locations[user_id]
-                if datetime.now() - location_data['last_updated'] < timedelta(minutes=10):  # Только свежие локации
-                    participant['current_location'] = {
-                        'lat': location_data['lat'],
-                        'lng': location_data['lng']
-                    }
-
         return jsonify({"status": "success", "data": participants})
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
@@ -262,6 +240,17 @@ def update_user_location():
 def get_promoted_locations():
     """Получить рекламные локации"""
     return jsonify({"status": "success", "data": PROMOTED_LOCATIONS})
+
+
+@app.route('/api/debug/trainings', methods=['GET'])
+def debug_trainings():
+    """Отладочный endpoint для просмотра всех тренировок"""
+    return jsonify({
+        "status": "success",
+        "trainings_count": len(trainings_storage),
+        "trainings": trainings_storage,
+        "participants": training_participants
+    })
 
 
 def cleanup_old_trainings():
