@@ -625,3 +625,337 @@
                 const getUrlParams = () => {
                     const urlParams = new URLSearchParams(window.location.search);
                     const mode = urlParams.get('mode');
+                    return mode || 'events';
+                };
+
+                // Lifecycle
+                onMounted(() => {
+                    console.log('App mounted');
+                    initTelegramApp();
+                    activeMode.value = getUrlParams();
+                    initMap();
+
+                    // Автоматически определяем локацию для раздела тренировок
+                    if (activeMode.value === 'trainings') {
+                        setTimeout(autoDetectLocation, 1000);
+                    }
+                });
+
+                // Watchers
+                watch(activeMode, (newMode) => {
+                    console.log('Mode changed to:', newMode);
+                    updateMapMarkers();
+                    loadData();
+
+                    if (newMode === 'trainings') {
+                        autoDetectLocation();
+                    }
+
+                    const newUrl = new URL(window.location);
+                    newUrl.searchParams.set('mode', newMode);
+                    window.history.replaceState({}, '', newUrl);
+                });
+
+                watch(() => eventFilters.value.sport, loadEvents);
+                watch(() => eventFilters.value.radius, loadEvents);
+                watch(() => trainingFilters.value.sport, loadTrainings);
+                watch(() => trainingFilters.value.radius, loadTrainings);
+                watch(userLocation, loadData);
+
+                // Expose methods to global scope for popup buttons
+                window.app = {
+                    joinTraining,
+                    usePromoLocation,
+                    viewParticipants,
+                    joinEvent
+                };
+
+                // Return template data
+                return {
+                    // State
+                    activeMode,
+                    events,
+                    trainings,
+                    promotedLocations,
+                    loading,
+                    userLocation,
+                    isSharingLocation,
+                    userComment,
+                    telegramUser,
+                    eventFilters,
+                    trainingFilters,
+                    showQuiz,
+                    quizStep,
+                    newTraining,
+                    creatingTraining,
+
+                    // Methods
+                    updateLocation,
+                    loadData,
+                    startQuiz,
+                    nextQuizStep,
+                    prevQuizStep,
+                    usePromoLocation,
+                    joinTraining,
+                    viewParticipants,
+                    startLocationSharing,
+                    stopLocationSharing,
+                    formatTime,
+                    getCurrentDateTime
+                };
+            },
+            template: `
+                <div class="app-container">
+                    <!-- Header -->
+                    <header class="app-header">
+                        <h1>
+                            <span v-if="activeMode === 'events'">🏃 Поиск мероприятий</span>
+                            <span v-else>💪 Поиск тренировок</span>
+                        </h1>
+                    </header>
+
+                    <!-- Mode Selector -->
+                    <nav class="mode-selector">
+                        <button
+                            @click="activeMode = 'events'"
+                            :class="{ active: activeMode === 'events' }"
+                            class="mode-button"
+                        >
+                            🗓️ Мероприятия
+                        </button>
+                        <button
+                            @click="activeMode = 'trainings'"
+                            :class="{ active: activeMode === 'trainings' }"
+                            class="mode-button"
+                        >
+                            💪 Тренировки
+                        </button>
+                    </nav>
+
+                    <!-- User Profile -->
+                    <div v-if="activeMode === 'trainings' && telegramUser" class="user-profile-panel">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <div v-if="telegramUser.photo_url" style="width: 40px; height: 40px; border-radius: 50%; overflow: hidden;">
+                                <img :src="telegramUser.photo_url" style="width: 100%; height: 100%; object-fit: cover;" />
+                            </div>
+                            <div v-else class="participant-avatar">
+                                {{ telegramUser.first_name?.charAt(0) || 'Г' }}
+                            </div>
+                            <div>
+                                <h4 style="margin: 0; font-size: 16px;">{{ telegramUser.first_name }}</h4>
+                                <p style="margin: 5px 0 0 0; font-size: 14px; opacity: 0.9;">
+                                    Готов к тренировкам!
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Filters for Events -->
+                    <div v-if="activeMode === 'events'" class="filters-panel">
+                        <select v-model="eventFilters.sport" class="filter-select" title="Выберите вид спорта" name="eventSport">
+                            <option value="">Все виды спорта</option>
+                            <option value="бег">🏃 Бег</option>
+                            <option value="велоспорт">🚴 Велоспорт</option>
+                            <option value="лыжи">⛷️ Лыжи</option>
+                        </select>
+
+                        <select v-model="eventFilters.radius" class="filter-select" :disabled="!userLocation" title="Радиус поиска" name="eventRadius">
+                            <option value="5">5 км</option>
+                            <option value="10">10 км</option>
+                            <option value="25">25 км</option>
+                        </select>
+
+                        <button @click="updateLocation()" class="location-btn">
+                            📍 {{ userLocation ? 'Обновить' : 'Мое местоположение' }}
+                        </button>
+                    </div>
+
+                    <!-- Filters for Trainings -->
+                    <div v-if="activeMode === 'trainings'" class="filters-panel">
+                        <select v-model="trainingFilters.sport" class="filter-select" title="Выберите вид спорта" name="trainingSport">
+                            <option value="">Любой вид спорта</option>
+                            <option value="бег">🏃 Бег</option>
+                            <option value="велоспорт">🚴 Велоспорт</option>
+                            <option value="йога">🧘 Йога</option>
+                            <option value="футбол">⚽ Футбол</option>
+                        </select>
+
+                        <select v-model="trainingFilters.radius" class="filter-select" title="Радиус поиска тренировок" name="trainingRadius">
+                            <option value="1">1 км</option>
+                            <option value="3">3 км</option>
+                            <option value="5">5 км</option>
+                            <option value="10">10 км</option>
+                        </select>
+
+                        <button @click="updateLocation()" class="location-btn">
+                            📍 {{ userLocation ? 'Обновить' : 'Определить район' }}
+                        </button>
+
+                        <button @click="startQuiz" class="location-btn" style="background: #ff6b6b;">
+                            ➕ Создать тренировку
+                        </button>
+
+                        <div v-if="isSharingLocation" style="display: flex; align-items: center; gap: 10px;">
+                            <span style="color: #28a745;">📍 Делитесь геолокацией</span>
+                            <button @click="stopLocationSharing" class="location-btn" style="background: #dc3545;">
+                                ❌ Остановить
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Loading -->
+                    <div v-if="loading" class="loading">
+                        <div class="spinner"></div>
+                        <div v-if="activeMode === 'events'">Загружаем мероприятия...</div>
+                        <div v-else>Ищем тренировки поблизости...</div>
+                    </div>
+
+                    <!-- Map -->
+                    <div id="map" class="map-container"></div>
+
+                    <!-- Quiz Overlay -->
+                    <div v-if="showQuiz" class="quiz-overlay">
+                        <div class="quiz-container">
+                            <h3>Создание тренировки</h3>
+
+                            <!-- Progress Bar -->
+                            <div class="quiz-progress">
+                                <div class="quiz-progress-bar" :style="{ width: (quizStep / 5) * 100 + '%' }"></div>
+                            </div>
+
+                            <!-- Step 1: Название -->
+                            <div class="quiz-step" :class="{ active: quizStep === 1 }">
+                                <h4>Шаг 1: Название тренировки</h4>
+                                <div class="form-group">
+                                    <label for="trainingTitle" class="form-label">Название тренировки:</label>
+                                    <input
+                                        id="trainingTitle"
+                                        name="trainingTitle"
+                                        v-model="newTraining.title"
+                                        placeholder="Например: Утренняя пробежка в парке"
+                                        class="filter-select"
+                                        style="width: 100%; margin: 5px 0;"
+                                        title="Введите название тренировки"
+                                    />
+                                </div>
+                                <div class="quiz-navigation">
+                                    <button @click="showQuiz = false" class="location-btn" style="background: #6c757d;">Отмена</button>
+                                    <button @click="nextQuizStep" class="location-btn" :disabled="!newTraining.title">Далее</button>
+                                </div>
+                            </div>
+
+                            <!-- Step 2: Вид спорта -->
+                            <div class="quiz-step" :class="{ active: quizStep === 2 }">
+                                <h4>Шаг 2: Выберите вид спорта</h4>
+                                <div class="form-group">
+                                    <label for="trainingSport" class="form-label">Вид спорта:</label>
+                                    <select id="trainingSport" name="trainingSport" v-model="newTraining.sport" class="filter-select" style="width: 100%; margin: 5px 0;" title="Выберите вид спорта">
+                                        <option value="">Выберите спорт</option>
+                                        <option value="бег">🏃 Бег</option>
+                                        <option value="велоспорт">🚴 Велоспорт</option>
+                                        <option value="йога">🧘 Йога</option>
+                                        <option value="футбол">⚽ Футбол</option>
+                                        <option value="теннис">🎾 Теннис</option>
+                                        <option value="плавание">🏊 Плавание</option>
+                                    </select>
+                                </div>
+                                <div class="quiz-navigation">
+                                    <button @click="prevQuizStep" class="location-btn" style="background: #6c757d;">Назад</button>
+                                    <button @click="nextQuizStep" class="location-btn" :disabled="!newTraining.sport">Далее</button>
+                                </div>
+                            </div>
+
+                            <!-- Step 3: Время -->
+                            <div class="quiz-step" :class="{ active: quizStep === 3 }">
+                                <h4>Шаг 3: Время тренировки</h4>
+                                <div class="form-group">
+                                    <label for="startTime" class="form-label">Время начала:</label>
+                                    <input
+                                        id="startTime"
+                                        name="startTime"
+                                        v-model="newTraining.startTime"
+                                        type="datetime-local"
+                                        :min="getCurrentDateTime()"
+                                        class="filter-select"
+                                        style="width: 100%; margin: 5px 0;"
+                                        title="Выберите время начала тренировки"
+                                    />
+                                </div>
+                                <div class="form-group">
+                                    <label for="endTime" class="form-label">Время окончания (опционально):</label>
+                                    <input
+                                        id="endTime"
+                                        name="endTime"
+                                        v-model="newTraining.endTime"
+                                        type="datetime-local"
+                                        :min="newTraining.startTime"
+                                        class="filter-select"
+                                        style="width: 100%; margin: 5px 0;"
+                                        title="Выберите время окончания тренировки"
+                                    />
+                                </div>
+                                <div class="quiz-navigation">
+                                    <button @click="prevQuizStep" class="location-btn" style="background: #6c757d;">Назад</button>
+                                    <button @click="nextQuizStep" class="location-btn" :disabled="!newTraining.startTime">Далее</button>
+                                </div>
+                            </div>
+
+                            <!-- Step 4: Дополнительно -->
+                            <div class="quiz-step" :class="{ active: quizStep === 4 }">
+                                <h4>Шаг 4: Дополнительная информация</h4>
+                                <div class="form-group">
+                                    <label for="trainingComment" class="form-label">Описание тренировки:</label>
+                                    <textarea
+                                        id="trainingComment"
+                                        name="trainingComment"
+                                        v-model="newTraining.comment"
+                                        placeholder="Опишите вашу тренировку, что нужно взять с собой, уровень подготовки..."
+                                        class="filter-select"
+                                        style="width: 100%; height: 100px; margin: 5px 0; resize: vertical;"
+                                        title="Введите описание тренировки"
+                                    ></textarea>
+                                </div>
+
+                                <div class="form-group">
+                                    <label>
+                                        <input type="checkbox" v-model="newTraining.autoAccept" name="autoAccept" />
+                                        Автоматически принимать участников
+                                    </label>
+                                    <small style="display: block; color: #666; margin-top: 5px;">
+                                        Если отключено, вы будете подтверждать каждого участника вручную
+                                    </small>
+                                </div>
+
+                                <!-- Имя для не-Telegram пользователей -->
+                                <div v-if="!telegramUser" class="form-group">
+                                    <label for="userName" class="form-label">Ваше имя:</label>
+                                    <input
+                                        id="userName"
+                                        name="userName"
+                                        v-model="newTraining.userInputName"
+                                        placeholder="Введите ваше имя"
+                                        class="filter-select"
+                                        style="width: 100%; margin: 5px 0;"
+                                        title="Введите ваше имя"
+                                    />
+                                </div>
+
+                                <div class="quiz-navigation">
+                                    <button @click="prevQuizStep" class="location-btn" style="background: #6c757d;">Назад</button>
+                                    <button @click="nextQuizStep" class="location-btn" :disabled="creatingTraining">
+                                        {{ creatingTraining ? 'Создание...' : 'Создать' }}
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `
+        };
+
+        // Create and mount Vue app
+        const app = createApp(App);
+        app.mount('#app');
+    </script>
+</body>
+</html>
