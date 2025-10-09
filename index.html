@@ -1,4 +1,3 @@
-<!-- frontend/index.html -->
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -23,14 +22,22 @@
         .location-btn:hover { background: #218838; }
         .location-btn:disabled { background: #6c757d; cursor: not-allowed; }
         .map-container { flex: 1; min-height: 400px; }
-        .event-popup, .user-popup { max-width: 280px; }
-        .event-popup h4, .user-popup h4 { margin: 0 0 10px 0; color: #333; font-size: 16px; }
-        .event-popup p, .user-popup p { margin: 5px 0; color: #666; font-size: 14px; }
-        .event-popup button, .user-popup button { background: #007bff; color: white; border: none; padding: 10px 16px; border-radius: 6px; cursor: pointer; width: 100%; margin-top: 10px; }
-        .event-popup button:hover, .user-popup button:hover { background: #0056b3; }
+        .event-popup, .training-popup { max-width: 280px; }
+        .event-popup h4, .training-popup h4 { margin: 0 0 10px 0; color: #333; font-size: 16px; }
+        .event-popup p, .training-popup p { margin: 5px 0; color: #666; font-size: 14px; }
+        .event-popup button, .training-popup button { background: #007bff; color: white; border: none; padding: 10px 16px; border-radius: 6px; cursor: pointer; width: 100%; margin-top: 10px; }
+        .event-popup button:hover, .training-popup button:hover { background: #0056b3; }
         .user-profile-panel { padding: 15px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-bottom: 1px solid #dee2e6; }
         .loading { display: flex; justify-content: center; align-items: center; height: 200px; color: #666; flex-direction: column; gap: 10px; }
         .spinner { border: 3px solid #f3f3f3; border-top: 3px solid #007bff; border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; }
+        .quiz-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); display: flex; align-items: center; justify-content: center; z-index: 1000; }
+        .quiz-container { background: white; padding: 20px; border-radius: 10px; max-width: 400px; width: 90%; max-height: 90vh; overflow-y: auto; }
+        .quiz-step { display: none; }
+        .quiz-step.active { display: block; }
+        .promo-location { border: 2px solid #ff6b6b; background: #fff5f5; padding: 10px; margin: 10px 0; border-radius: 8px; }
+        .participant-list { max-height: 200px; overflow-y: auto; border: 1px solid #ddd; padding: 10px; border-radius: 5px; margin-top: 10px; }
+        .participant-item { display: flex; align-items: center; gap: 10px; padding: 5px 0; border-bottom: 1px solid #eee; }
+        .participant-avatar { width: 30px; height: 30px; border-radius: 50%; background: #667eea; display: flex; align-items: center; justify-content: center; color: white; font-size: 14px; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
@@ -47,7 +54,8 @@
                 // Reactive state
                 const activeMode = ref('events');
                 const events = ref([]);
-                const nearbyUsers = ref([]);
+                const trainings = ref([]);
+                const promotedLocations = ref([]);
                 const loading = ref(false);
                 const userLocation = ref(null);
                 const isSharingLocation = ref(false);
@@ -56,11 +64,23 @@
                 const markers = ref([]);
                 const telegramUser = ref(null);
 
-                // ✅ ДОБАВЛЕНО: URL бэкенда на PythonAnywhere
+                // Квиз состояния
+                const showQuiz = ref(false);
+                const quizStep = ref(1);
+                const newTraining = ref({
+                    title: '',
+                    sport: '',
+                    startTime: '',
+                    endTime: '',
+                    comment: '',
+                    autoAccept: true,
+                    userInputName: ''
+                });
+
                 const BACKEND_URL = "https://skienbear.pythonanywhere.com";
 
                 const eventFilters = ref({ sport: '', radius: 10 });
-                const peopleFilters = ref({ sport: '', radius: 5 });
+                const trainingFilters = ref({ sport: '', radius: 5 });
 
                 // Methods
                 const initTelegramApp = () => {
@@ -72,7 +92,12 @@
                         console.log('Telegram user:', telegramUser.value);
                     } else {
                         console.log('Development mode - no Telegram WebApp');
-                        telegramUser.value = { id: 123456789, first_name: 'Demo', username: 'demo_user' };
+                        telegramUser.value = {
+                            id: Math.floor(Math.random() * 1000000),
+                            first_name: 'Гость',
+                            username: 'guest_user',
+                            photo_url: null
+                        };
                     }
                 };
 
@@ -81,7 +106,6 @@
 
                     loading.value = true;
                     try {
-                        console.log('Loading events...');
                         const params = new URLSearchParams();
                         if (eventFilters.value.sport) params.append('sport', eventFilters.value.sport);
                         if (userLocation.value) {
@@ -90,22 +114,16 @@
                             params.append('radius', eventFilters.value.radius);
                         }
 
-                        // ✅ ИЗМЕНЕНО: Используем PythonAnywhere бэкенд
                         const response = await fetch(`${BACKEND_URL}/api/events?${params}`);
-
-                        // ✅ ИЗМЕНЕНО: Обработка ответа Flask
                         const result = await response.json();
                         if (result.status === "success") {
                             events.value = result.data;
                         } else {
                             throw new Error(result.message || 'Failed to load events');
                         }
-
-                        console.log('Loaded events:', events.value);
                         updateMapMarkers();
                     } catch (error) {
                         console.error('Failed to load events:', error);
-                        // Fallback to mock data
                         events.value = getMockEvents();
                         updateMapMarkers();
                     } finally {
@@ -113,46 +131,45 @@
                     }
                 };
 
-                const loadNearbyUsers = async () => {
-                    if (activeMode.value !== 'people') return;
-
-                    if (!userLocation.value) {
-                        nearbyUsers.value = [];
-                        updateMapMarkers();
-                        return;
-                    }
+                const loadTrainings = async () => {
+                    if (activeMode.value !== 'trainings') return;
 
                     loading.value = true;
                     try {
-                        const params = new URLSearchParams({
-                            lat: userLocation.value.lat,
-                            lng: userLocation.value.lng,
-                            radius: peopleFilters.value.radius
-                        });
-
-                        if (peopleFilters.value.sport) {
-                            params.append('sport', peopleFilters.value.sport);
+                        const params = new URLSearchParams();
+                        if (trainingFilters.value.sport) params.append('sport', trainingFilters.value.sport);
+                        if (userLocation.value) {
+                            params.append('lat', userLocation.value.lat);
+                            params.append('lng', userLocation.value.lng);
+                            params.append('radius', trainingFilters.value.radius);
                         }
 
-                        // ✅ ИЗМЕНЕНО: Используем PythonAnywhere бэкенд
-                        const response = await fetch(`${BACKEND_URL}/api/users/nearby?${params}`);
-
-                        // ✅ ИЗМЕНЕНО: Обработка ответа Flask
+                        const response = await fetch(`${BACKEND_URL}/api/trainings?${params}`);
                         const result = await response.json();
                         if (result.status === "success") {
-                            nearbyUsers.value = result.data;
+                            trainings.value = result.data;
                         } else {
-                            throw new Error(result.message || 'Failed to load users');
+                            throw new Error(result.message || 'Failed to load trainings');
                         }
-
-                        console.log('Loaded nearby users:', nearbyUsers.value);
                         updateMapMarkers();
                     } catch (error) {
-                        console.error('Failed to load nearby users:', error);
-                        nearbyUsers.value = getMockUsers();
+                        console.error('Failed to load trainings:', error);
+                        trainings.value = getMockTrainings();
                         updateMapMarkers();
                     } finally {
                         loading.value = false;
+                    }
+                };
+
+                const loadPromotedLocations = async () => {
+                    try {
+                        const response = await fetch(`${BACKEND_URL}/api/promoted-locations`);
+                        const result = await response.json();
+                        if (result.status === "success") {
+                            promotedLocations.value = result.data;
+                        }
+                    } catch (error) {
+                        console.error('Failed to load promoted locations:', error);
                     }
                 };
 
@@ -166,13 +183,11 @@
 
                     console.log('Map initialized');
                     loadData();
+                    loadPromotedLocations();
                 };
 
                 const updateMapMarkers = () => {
-                    if (!map.value) {
-                        console.log('Map not ready yet');
-                        return;
-                    }
+                    if (!map.value) return;
 
                     // Clear old markers
                     markers.value.forEach(marker => {
@@ -198,39 +213,68 @@
                                             </button>
                                         </div>
                                     `);
-
                                 markers.value.push(marker);
                             } catch (error) {
                                 console.error('Error creating event marker:', error);
                             }
                         });
-                    } else {
-                        // Add user markers
-                        nearbyUsers.value.forEach(user => {
+                    } else if (activeMode.value === 'trainings') {
+                        // Add training markers
+                        trainings.value.forEach(training => {
                             try {
-                                const marker = L.marker([user.lat, user.lng], {
+                                const marker = L.marker([training.lat, training.lng], {
                                     icon: L.divIcon({
-                                        className: 'user-marker',
-                                        html: '👤',
+                                        className: 'training-marker',
+                                        html: '💪',
+                                        iconSize: [30, 30]
+                                    })
+                                })
+                                .addTo(map.value)
+                                .bindPopup(`
+                                    <div class="training-popup">
+                                        <h4>${training.title}</h4>
+                                        <p>${training.comment || 'Присоединяйтесь к тренировке!'}</p>
+                                        <p><strong>👤 Организатор:</strong> ${training.user_name}</p>
+                                        <p><strong>🏃 Спорт:</strong> ${training.sport}</p>
+                                        <p><strong>⏰ Время:</strong> ${formatTime(training.start_time)}</p>
+                                        <p><strong>👥 Участников:</strong> ${training.participants_count || 0}</p>
+                                        <button onclick="app.joinTraining('${training.id}')">
+                                            ✅ Присоединиться
+                                        </button>
+                                    </div>
+                                `);
+                                markers.value.push(marker);
+                            } catch (error) {
+                                console.error('Error creating training marker:', error);
+                            }
+                        });
+
+                        // Add promoted locations markers
+                        promotedLocations.value.forEach(location => {
+                            try {
+                                const marker = L.marker([location.lat, location.lng], {
+                                    icon: L.divIcon({
+                                        className: 'promo-marker',
+                                        html: '🔥',
                                         iconSize: [25, 25]
                                     })
                                 })
                                 .addTo(map.value)
                                 .bindPopup(`
-                                    <div class="user-popup">
-                                        <h4>${user.name}</h4>
-                                        <p>${user.comment || 'Люблю активный образ жизни!'}</p>
-                                        <p><strong>💪 Интересы:</strong> ${user.sports?.join(', ') || 'Разные виды спорта'}</p>
-                                        <p><strong>📏 Расстояние:</strong> ${user.distance} км</p>
-                                        <button onclick="alert('Запрос на контакт отправлен ${user.name}!')">
-                                            📞 Связаться
-                                        </button>
+                                    <div class="training-popup">
+                                        <div class="promo-location">
+                                            <h4>${location.title}</h4>
+                                            <p>${location.description}</p>
+                                            <p><strong>${location.promo_text}</strong></p>
+                                            <button onclick="app.usePromoLocation(${location.lat}, ${location.lng})">
+                                                🎯 Создать тренировку здесь
+                                            </button>
+                                        </div>
                                     </div>
                                 `);
-
                                 markers.value.push(marker);
                             } catch (error) {
-                                console.error('Error creating user marker:', error);
+                                console.error('Error creating promo marker:', error);
                             }
                         });
                     }
@@ -283,65 +327,157 @@
                     }
                 };
 
+                const autoDetectLocation = async () => {
+                    try {
+                        const location = await updateLocation();
+                        // Автоматически определяем район и устанавливаем радиус поиска
+                        trainingFilters.value.radius = 3; // Уменьшаем радиус для тренировок
+                        await loadTrainings();
+                        return location;
+                    } catch (error) {
+                        console.error('Auto location detection failed:', error);
+                    }
+                };
+
+                const startQuiz = () => {
+                    newTraining.value = {
+                        title: '',
+                        sport: '',
+                        startTime: '',
+                        endTime: '',
+                        comment: '',
+                        autoAccept: true,
+                        userInputName: telegramUser.value ? '' : 'Гость'
+                    };
+                    quizStep.value = 1;
+                    showQuiz.value = true;
+                };
+
+                const nextQuizStep = () => {
+                    if (quizStep.value < 5) {
+                        quizStep.value++;
+                    } else {
+                        createTraining();
+                    }
+                };
+
+                const prevQuizStep = () => {
+                    if (quizStep.value > 1) {
+                        quizStep.value--;
+                    }
+                };
+
+                const usePromoLocation = (lat, lng) => {
+                    userLocation.value = { lat, lng };
+                    startQuiz();
+                };
+
+                const createTraining = async () => {
+                    try {
+                        if (!userLocation.value) {
+                            alert('Сначала определите местоположение');
+                            return;
+                        }
+
+                        const userName = telegramUser.value ?
+                            telegramUser.value.first_name :
+                            newTraining.value.userInputName;
+
+                        const trainingData = {
+                            user_id: telegramUser.value.id,
+                            user_name: userName,
+                            user_photo: telegramUser.value?.photo_url,
+                            title: newTraining.value.title,
+                            sport: newTraining.value.sport,
+                            lat: userLocation.value.lat,
+                            lng: userLocation.value.lng,
+                            start_time: newTraining.value.startTime,
+                            end_time: newTraining.value.endTime || null,
+                            comment: newTraining.value.comment,
+                            auto_accept: newTraining.value.autoAccept
+                        };
+
+                        const response = await fetch(`${BACKEND_URL}/api/trainings`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify(trainingData)
+                        });
+
+                        const result = await response.json();
+                        if (result.status === "success") {
+                            alert('✅ Тренировка создана!');
+                            showQuiz.value = false;
+                            await loadTrainings();
+                        } else {
+                            throw new Error(result.message || 'Failed to create training');
+                        }
+                    } catch (error) {
+                        console.error('Error creating training:', error);
+                        alert('❌ Не удалось создать тренировку: ' + error.message);
+                    }
+                };
+
+                const joinTraining = async (trainingId) => {
+                    try {
+                        const userName = telegramUser.value ?
+                            telegramUser.value.first_name :
+                            'Гость';
+
+                        const response = await fetch(`${BACKEND_URL}/api/trainings/${trainingId}/join`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                user_id: telegramUser.value.id,
+                                user_name: userName,
+                                user_photo: telegramUser.value?.photo_url
+                            })
+                        });
+
+                        const result = await response.json();
+                        if (result.status === "success") {
+                            alert('✅ ' + result.message);
+                            // Загружаем участников тренировки
+                            await loadTrainingParticipants(trainingId);
+                        } else {
+                            throw new Error(result.message || 'Failed to join training');
+                        }
+                    } catch (error) {
+                        console.error('Error joining training:', error);
+                        alert('❌ Не удалось присоединиться: ' + error.message);
+                    }
+                };
+
+                const loadTrainingParticipants = async (trainingId) => {
+                    try {
+                        const response = await fetch(`${BACKEND_URL}/api/trainings/${trainingId}/participants`);
+                        const result = await response.json();
+                        if (result.status === "success") {
+                            // Здесь можно отобразить список участников
+                            console.log('Participants:', result.data);
+                        }
+                    } catch (error) {
+                        console.error('Error loading participants:', error);
+                    }
+                };
+
                 const loadData = () => {
                     if (activeMode.value === 'events') {
                         return loadEvents();
-                    } else {
-                        return loadNearbyUsers();
+                    } else if (activeMode.value === 'trainings') {
+                        return loadTrainings();
                     }
-                };
-
-                const startSharing = async () => {
-                    try {
-                        const location = await updateLocation();
-                        isSharingLocation.value = true;
-
-                        // Save to server
-                        if (telegramUser.value) {
-                            // ✅ ИЗМЕНЕНО: Используем PythonAnywhere бэкенд
-                            const response = await fetch(`${BACKEND_URL}/api/users/location`, {
-                                method: 'POST',
-                                headers: {
-                                    'Content-Type': 'application/json',
-                                },
-                                body: JSON.stringify({
-                                    user_id: telegramUser.value.id,
-                                    username: telegramUser.value.first_name || telegramUser.value.username,
-                                    lat: location.lat,
-                                    lng: location.lng,
-                                    comment: userComment.value || 'Ищу напарников для тренировок!',
-                                    sports: getSelectedSports()
-                                })
-                            });
-
-                            // ✅ ИЗМЕНЕНО: Обработка ответа Flask
-                            const result = await response.json();
-                            if (result.status === "success") {
-                                alert('✅ Теперь другие пользователи могут видеть вас на карте!');
-                            } else {
-                                throw new Error(result.message || 'Failed to update location');
-                            }
-                        }
-                    } catch (error) {
-                        console.error('Error sharing location:', error);
-                        alert('❌ Не удалось поделиться местоположением: ' + error.message);
-                    }
-                };
-
-                const stopSharing = () => {
-                    isSharingLocation.value = false;
-                    userLocation.value = null;
-                    nearbyUsers.value = [];
-                    updateMapMarkers();
-                    alert('🔒 Вы больше не видимы другим пользователям');
                 };
 
                 // Helper functions
-                const getSelectedSports = () => {
-                    const sports = [];
-                    if (eventFilters.value.sport) sports.push(eventFilters.value.sport);
-                    if (peopleFilters.value.sport) sports.push(peopleFilters.value.sport);
-                    return sports.length > 0 ? sports : ['бег', 'велоспорт'];
+                const formatTime = (timeString) => {
+                    return new Date(timeString).toLocaleTimeString('ru-RU', {
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
                 };
 
                 const getMockEvents = () => {
@@ -355,54 +491,26 @@
                             location: "Москва, Воробьевы горы",
                             lat: 55.710,
                             lng: 37.553
-                        },
-                        {
-                            id: 2,
-                            title: "Ночной велопробег",
-                            description: "Ночная велопрогулка по освещенным улицам города",
-                            sport: "велоспорт",
-                            date: "2024-10-20",
-                            location: "Москва, Парк Горького",
-                            lat: 55.731,
-                            lng: 37.603
-                        },
-                        {
-                            id: 3,
-                            title: "Пробежка в Парке Победы",
-                            description: "Еженедельная групповая пробежка для всех желающих",
-                            sport: "бег",
-                            date: "2024-11-05",
-                            location: "Москва, Парк Победы",
-                            lat: 55.736,
-                            lng: 37.515
                         }
                     ];
                 };
 
-                const getMockUsers = () => {
+                const getMockTrainings = () => {
                     return [
                         {
-                            id: 1,
-                            name: "Алексей",
+                            id: "training_1",
+                            title: "Утренняя пробежка",
+                            sport: "бег",
                             lat: 55.7558,
                             lng: 37.6173,
-                            comment: "Ищу напарника для утренних пробежек",
-                            sports: ["бег"],
-                            distance: 0.5
-                        },
-                        {
-                            id: 2,
-                            name: "Мария",
-                            lat: 55.7600,
-                            lng: 37.6200,
-                            comment: "Люблю велопрогулки по паркам",
-                            sports: ["велоспорт"],
-                            distance: 1.2
+                            start_time: new Date().toISOString(),
+                            user_name: "Алексей",
+                            participants_count: 3,
+                            comment: "Присоединяйтесь к утренней пробежке!"
                         }
                     ];
                 };
 
-                // Get URL parameters
                 const getUrlParams = () => {
                     const urlParams = new URLSearchParams(window.location.search);
                     const mode = urlParams.get('mode');
@@ -413,11 +521,13 @@
                 onMounted(() => {
                     console.log('App mounted');
                     initTelegramApp();
-
-                    // Set mode from URL parameters
                     activeMode.value = getUrlParams();
-
                     initMap();
+
+                    // Автоматически определяем локацию для раздела тренировок
+                    if (activeMode.value === 'trainings') {
+                        setTimeout(autoDetectLocation, 1000);
+                    }
                 });
 
                 // Watchers
@@ -426,7 +536,10 @@
                     updateMapMarkers();
                     loadData();
 
-                    // Update URL without page reload
+                    if (newMode === 'trainings') {
+                        autoDetectLocation();
+                    }
+
                     const newUrl = new URL(window.location);
                     newUrl.searchParams.set('mode', newMode);
                     window.history.replaceState({}, '', newUrl);
@@ -434,29 +547,43 @@
 
                 watch(() => eventFilters.value.sport, loadEvents);
                 watch(() => eventFilters.value.radius, loadEvents);
-                watch(() => peopleFilters.value.sport, loadNearbyUsers);
-                watch(() => peopleFilters.value.radius, loadNearbyUsers);
+                watch(() => trainingFilters.value.sport, loadTrainings);
+                watch(() => trainingFilters.value.radius, loadTrainings);
                 watch(userLocation, loadData);
+
+                // Expose methods to global scope for popup buttons
+                window.app = {
+                    joinTraining,
+                    usePromoLocation
+                };
 
                 // Return template data
                 return {
                     // State
                     activeMode,
                     events,
-                    nearbyUsers,
+                    trainings,
+                    promotedLocations,
                     loading,
                     userLocation,
                     isSharingLocation,
                     userComment,
                     telegramUser,
                     eventFilters,
-                    peopleFilters,
+                    trainingFilters,
+                    showQuiz,
+                    quizStep,
+                    newTraining,
 
                     // Methods
                     updateLocation,
-                    startSharing,
-                    stopSharing,
-                    loadData
+                    loadData,
+                    startQuiz,
+                    nextQuizStep,
+                    prevQuizStep,
+                    usePromoLocation,
+                    joinTraining,
+                    formatTime
                 };
             },
             template: `
@@ -465,7 +592,7 @@
                     <header class="app-header">
                         <h1>
                             <span v-if="activeMode === 'events'">🏃 Поиск мероприятий</span>
-                            <span v-else>👥 Поиск напарников</span>
+                            <span v-else>💪 Поиск тренировок</span>
                         </h1>
                     </header>
 
@@ -479,24 +606,27 @@
                             🗓️ Мероприятия
                         </button>
                         <button
-                            @click="activeMode = 'people'"
-                            :class="{ active: activeMode === 'people' }"
+                            @click="activeMode = 'trainings'"
+                            :class="{ active: activeMode === 'trainings' }"
                             class="mode-button"
                         >
-                            👥 Напарники
+                            💪 Тренировки
                         </button>
                     </nav>
 
                     <!-- User Profile -->
-                    <div v-if="activeMode === 'people' && telegramUser" class="user-profile-panel">
+                    <div v-if="activeMode === 'trainings' && telegramUser" class="user-profile-panel">
                         <div style="display: flex; align-items: center; gap: 10px;">
-                            <div style="width: 40px; height: 40px; border-radius: 50%; background: rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; font-size: 20px;">
-                                👤
+                            <div v-if="telegramUser.photo_url" style="width: 40px; height: 40px; border-radius: 50%; overflow: hidden;">
+                                <img :src="telegramUser.photo_url" style="width: 100%; height: 100%; object-fit: cover;" />
+                            </div>
+                            <div v-else class="participant-avatar">
+                                {{ telegramUser.first_name?.charAt(0) || 'Г' }}
                             </div>
                             <div>
                                 <h4 style="margin: 0; font-size: 16px;">{{ telegramUser.first_name }}</h4>
                                 <p style="margin: 5px 0 0 0; font-size: 14px; opacity: 0.9;">
-                                    {{ userComment || 'Расскажите о ваших спортивных интересах' }}
+                                    Готов к тренировкам!
                                 </p>
                             </div>
                         </div>
@@ -509,78 +639,24 @@
                             <option value="бег">🏃 Бег</option>
                             <option value="велоспорт">🚴 Велоспорт</option>
                             <option value="лыжи">⛷️ Лыжи</option>
-                            <option value="йога">🧘 Йога</option>
-                            <option value="плавание">🏊 Плавание</option>
                         </select>
 
                         <select v-model="eventFilters.radius" class="filter-select" :disabled="!userLocation">
                             <option value="5">5 км</option>
                             <option value="10">10 км</option>
                             <option value="25">25 км</option>
-                            <option value="50">50 км</option>
                         </select>
 
                         <button @click="updateLocation()" class="location-btn">
                             📍 {{ userLocation ? 'Обновить' : 'Мое местоположение' }}
                         </button>
-
-                        <span v-if="loading" style="color: #666;">
-                            Загружаем мероприятия...
-                        </span>
                     </div>
 
-                    <!-- Filters for People -->
-                    <div v-if="activeMode === 'people'" class="filters-panel">
-                        <select v-model="peopleFilters.sport" class="filter-select">
+                    <!-- Filters for Trainings -->
+                    <div v-if="activeMode === 'trainings'" class="filters-panel">
+                        <select v-model="trainingFilters.sport" class="filter-select">
                             <option value="">Любой вид спорта</option>
                             <option value="бег">🏃 Бег</option>
                             <option value="велоспорт">🚴 Велоспорт</option>
-                            <option value="лыжи">⛷️ Лыжи</option>
                             <option value="йога">🧘 Йога</option>
-                        </select>
-
-                        <select v-model="peopleFilters.radius" class="filter-select">
-                            <option value="1">1 км</option>
-                            <option value="5">5 км</option>
-                            <option value="10">10 км</option>
-                            <option value="25">25 км</option>
-                        </select>
-
-                        <div v-if="!isSharingLocation">
-                            <input
-                                v-model="userComment"
-                                placeholder="Ваши спортивные интересы..."
-                                class="filter-select"
-                                style="min-width: 200px;"
-                            />
-                            <button @click="startSharing" class="location-btn">
-                                👥 Стать видимым
-                            </button>
-                        </div>
-                        <div v-else style="display: flex; align-items: center; gap: 10px;">
-                            <span style="color: #28a745;">✔ Вы видимы</span>
-                            <button @click="stopSharing" class="location-btn" style="background: #dc3545;">
-                                ❌ Скрыться
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Loading -->
-                    <div v-if="loading" class="loading">
-                        <div class="spinner"></div>
-                        <div v-if="activeMode === 'events'">Загружаем мероприятия...</div>
-                        <div v-else>Ищем напарников поблизости...</div>
-                    </div>
-
-                    <!-- Map -->
-                    <div id="map" class="map-container"></div>
-                </div>
-            `
-        };
-
-        // Create and mount Vue app
-        const app = createApp(App);
-        app.mount('#app');
-    </script>
-</body>
-</html>
+                            <option value="футбол">⚽ Футбол</
