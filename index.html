@@ -31,10 +31,12 @@
         .loading { display: flex; justify-content: center; align-items: center; height: 200px; color: #666; flex-direction: column; gap: 10px; }
         .spinner { border: 3px solid #f3f3f3; border-top: 3px solid #007bff; border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; }
         .quiz-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); display: flex; align-items: center; justify-content: center; z-index: 1000; }
-        .quiz-container { background: white; padding: 20px; border-radius: 10px; max-width: 400px; width: 90%; max-height: 90vh; overflow-y: auto; }
+        .quiz-container { background: white; padding: 20px; border-radius: 10px; max-width: 500px; width: 90%; max-height: 90vh; overflow-y: auto; }
         .quiz-step { display: none; }
         .quiz-step.active { display: block; }
         .promo-location { border: 2px solid #ff6b6b; background: #fff5f5; padding: 10px; margin: 10px 0; border-radius: 8px; }
+        .premium-training { border: 3px solid gold; background: linear-gradient(135deg, #fff9c4, #ffeb3b); padding: 15px; margin: 10px 0; border-radius: 10px; position: relative; }
+        .premium-badge { position: absolute; top: -10px; right: -10px; background: gold; color: #000; padding: 5px 10px; border-radius: 15px; font-weight: bold; font-size: 12px; }
         .participant-list { max-height: 200px; overflow-y: auto; border: 1px solid #ddd; padding: 10px; border-radius: 5px; margin-top: 10px; }
         .participant-item { display: flex; align-items: center; gap: 10px; padding: 5px 0; border-bottom: 1px solid #eee; }
         .participant-avatar { width: 30px; height: 30px; border-radius: 50%; background: #667eea; display: flex; align-items: center; justify-content: center; color: white; font-size: 14px; }
@@ -47,6 +49,7 @@
         .map-controls { position: absolute; top: 10px; right: 10px; z-index: 1000; display: flex; flex-direction: column; gap: 5px; }
         .map-control-btn { background: white; border: 1px solid #ccc; border-radius: 4px; padding: 8px 12px; cursor: pointer; font-size: 14px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
         .map-control-btn:hover { background: #f8f9fa; }
+        .location-selection-step { border: 2px dashed #007bff; padding: 15px; border-radius: 8px; margin: 10px 0; background: #f8f9fa; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
@@ -64,7 +67,7 @@
                 const activeMode = ref('events');
                 const events = ref([]);
                 const trainings = ref([]);
-                const promotedLocations = ref([]);
+                const premiumTraining = ref(null);
                 const loading = ref(false);
                 const userLocation = ref(null);
                 const selectedLocation = ref(null);
@@ -112,6 +115,18 @@
                             username: 'guest_user',
                             photo_url: null
                         };
+                    }
+                };
+
+                const safeMapOperation = (operation) => {
+                    if (!map.value) {
+                        console.warn('Map not initialized');
+                        return;
+                    }
+                    try {
+                        return operation();
+                    } catch (error) {
+                        console.warn('Map operation failed:', error);
                     }
                 };
 
@@ -169,6 +184,10 @@
                         } else {
                             throw new Error(result.message || 'Failed to load trainings');
                         }
+
+                        // Загружаем премиум тренировку
+                        await loadPremiumTraining();
+
                         updateMapMarkers();
                     } catch (error) {
                         console.error('Failed to load trainings:', error);
@@ -179,15 +198,16 @@
                     }
                 };
 
-                const loadPromotedLocations = async () => {
+                const loadPremiumTraining = async () => {
                     try {
-                        const response = await fetch(`${BACKEND_URL}/api/promoted-locations`);
+                        const response = await fetch(`${BACKEND_URL}/api/premium-training`);
                         const result = await response.json();
                         if (result.status === "success") {
-                            promotedLocations.value = result.data;
+                            premiumTraining.value = result.data;
+                            console.log('Loaded premium training:', premiumTraining.value);
                         }
                     } catch (error) {
-                        console.error('Failed to load promoted locations:', error);
+                        console.error('Failed to load premium training:', error);
                     }
                 };
 
@@ -199,13 +219,27 @@
                         const mapElement = document.getElementById('map');
                         if (!mapElement) {
                             console.error('Map element not found');
+                            setTimeout(initMap, 100);
                             return;
                         }
 
-                        map.value = L.map('map').setView([55.7558, 37.6173], 10);
+                        // Очищаем карту если уже инициализирована
+                        if (map.value) {
+                            map.value.remove();
+                        }
+
+                        map.value = L.map('map', {
+                            zoomControl: false,
+                            scrollWheelZoom: true
+                        }).setView([55.7558, 37.6173], 10);
 
                         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                             attribution: '© OpenStreetMap contributors'
+                        }).addTo(map.value);
+
+                        // Добавляем zoom control в нужное место
+                        L.control.zoom({
+                            position: 'topright'
                         }).addTo(map.value);
 
                         // Добавляем обработчик клика по карте для выбора локации
@@ -215,10 +249,28 @@
                             }
                         });
 
+                        // Отключаем анимацию для предотвращения ошибок
+                        map.value._animateZoom = function(center, zoom, startZoom, startScale) {
+                            try {
+                                // Простая реализация без сложной анимации
+                                this._move(center, zoom, startScale, true);
+                            } catch (error) {
+                                console.warn('Zoom animation error:', error);
+                                this._move(center, zoom);
+                            }
+                        };
+
                         console.log('Map initialized successfully');
                         loadData();
-                        loadPromotedLocations();
                     }, 100);
+                };
+
+                const centerOnPremiumTraining = () => {
+                    if (premiumTraining.value && map.value) {
+                        safeMapOperation(() => {
+                            map.value.setView([premiumTraining.value.lat, premiumTraining.value.lng], 13);
+                        });
+                    }
                 };
 
                 const selectLocationOnMap = (latlng) => {
@@ -229,17 +281,21 @@
 
                     // Удаляем предыдущий маркер
                     if (locationMarker.value) {
-                        map.value.removeLayer(locationMarker.value);
+                        safeMapOperation(() => {
+                            map.value.removeLayer(locationMarker.value);
+                        });
                     }
 
                     // Добавляем новый маркер
-                    locationMarker.value = L.marker([latlng.lat, latlng.lng])
-                        .addTo(map.value)
-                        .bindPopup('📍 Выбранная локация для тренировки')
-                        .openPopup();
+                    safeMapOperation(() => {
+                        locationMarker.value = L.marker([latlng.lat, latlng.lng])
+                            .addTo(map.value)
+                            .bindPopup('📍 Выбранная локация для тренировки')
+                            .openPopup();
 
-                    // Центрируем карту на выбранной локации
-                    map.value.setView([latlng.lat, latlng.lng], 14);
+                        // Центрируем карту на выбранной локации
+                        map.value.setView([latlng.lat, latlng.lng], 14);
+                    });
 
                     alert(`📍 Локация выбрана! Широта: ${latlng.lat.toFixed(6)}, Долгота: ${latlng.lng.toFixed(6)}`);
                     isSelectingLocation.value = false;
@@ -251,125 +307,119 @@
                 };
 
                 const updateMapMarkers = () => {
-                    if (!map.value) {
-                        console.log('Map not ready yet');
-                        return;
-                    }
+                    safeMapOperation(() => {
+                        // Clear old markers
+                        markers.value.forEach(marker => {
+                            if (marker) {
+                                map.value.removeLayer(marker);
+                            }
+                        });
+                        markers.value = [];
 
-                    // Clear old markers
-                    markers.value.forEach(marker => {
-                        if (marker && map.value) {
-                            map.value.removeLayer(marker);
-                        }
-                    });
-                    markers.value = [];
+                        trainingMarkers.value.forEach(marker => {
+                            if (marker) {
+                                map.value.removeLayer(marker);
+                            }
+                        });
+                        trainingMarkers.value = [];
 
-                    trainingMarkers.value.forEach(marker => {
-                        if (marker && map.value) {
-                            map.value.removeLayer(marker);
-                        }
-                    });
-                    trainingMarkers.value = [];
+                        if (activeMode.value === 'events') {
+                            // Add event markers
+                            events.value.forEach(event => {
+                                try {
+                                    if (event.lat && event.lng) {
+                                        const marker = L.marker([event.lat, event.lng])
+                                            .addTo(map.value)
+                                            .bindPopup(`
+                                                <div class="event-popup">
+                                                    <h4>${event.title}</h4>
+                                                    <p>${event.description}</p>
+                                                    <p><strong>📍 Место:</strong> ${event.location}</p>
+                                                    <p><strong>🏃 Спорт:</strong> ${event.sport}</p>
+                                                    <p><strong>📅 Дата:</strong> ${event.date}</p>
+                                                    <button onclick="app.joinEvent(${event.id})">
+                                                        ✅ Участвовать
+                                                    </button>
+                                                </div>
+                                            `);
+                                        markers.value.push(marker);
+                                    }
+                                } catch (error) {
+                                    console.error('Error creating event marker:', error);
+                                }
+                            });
+                        } else if (activeMode.value === 'trainings') {
+                            // Add premium training marker
+                            if (premiumTraining.value) {
+                                try {
+                                    const premiumMarker = L.marker([premiumTraining.value.lat, premiumTraining.value.lng], {
+                                        icon: L.divIcon({
+                                            className: 'premium-marker',
+                                            html: '👑',
+                                            iconSize: [35, 35]
+                                        })
+                                    })
+                                    .addTo(map.value)
+                                    .bindPopup(`
+                                        <div class="training-popup">
+                                            <div class="premium-training">
+                                                <div class="premium-badge">PREMIUM</div>
+                                                <h4>${premiumTraining.value.title}</h4>
+                                                <p>${premiumTraining.value.comment}</p>
+                                                <p><strong>👤 Организатор:</strong> ${premiumTraining.value.user_name}</p>
+                                                <p><strong>🏃 Спорт:</strong> ${premiumTraining.value.sport}</p>
+                                                <p><strong>⏰ Время:</strong> ${formatTime(premiumTraining.value.start_time)}</p>
+                                                <p><strong>👥 Участников:</strong> ${premiumTraining.value.participants_count || 0}</p>
+                                                <button onclick="app.joinTraining('${premiumTraining.value.id}')">
+                                                    ✅ Присоединиться
+                                                </button>
+                                            </div>
+                                        </div>
+                                    `);
+                                    trainingMarkers.value.push(premiumMarker);
+                                } catch (error) {
+                                    console.error('Error creating premium marker:', error);
+                                }
+                            }
 
-                    if (activeMode.value === 'events') {
-                        // Add event markers
-                        events.value.forEach(event => {
-                            try {
-                                if (event.lat && event.lng) {
-                                    const marker = L.marker([event.lat, event.lng])
+                            // Add regular training markers
+                            trainings.value.forEach(training => {
+                                try {
+                                    if (training.lat && training.lng) {
+                                        const marker = L.marker([training.lat, training.lng], {
+                                            icon: L.divIcon({
+                                                className: 'training-marker',
+                                                html: '💪',
+                                                iconSize: [30, 30]
+                                            })
+                                        })
                                         .addTo(map.value)
                                         .bindPopup(`
-                                            <div class="event-popup">
-                                                <h4>${event.title}</h4>
-                                                <p>${event.description}</p>
-                                                <p><strong>📍 Место:</strong> ${event.location}</p>
-                                                <p><strong>🏃 Спорт:</strong> ${event.sport}</p>
-                                                <p><strong>📅 Дата:</strong> ${event.date}</p>
-                                                <button onclick="app.joinEvent(${event.id})">
-                                                    ✅ Участвовать
+                                            <div class="training-popup">
+                                                <h4>${training.title}</h4>
+                                                <p>${training.comment || 'Присоединяйтесь к тренировке!'}</p>
+                                                <p><strong>👤 Организатор:</strong> ${training.user_name}</p>
+                                                <p><strong>🏃 Спорт:</strong> ${training.sport}</p>
+                                                <p><strong>⏰ Время:</strong> ${formatTime(training.start_time)}</p>
+                                                <p><strong>👥 Участников:</strong> ${training.participants_count || 0}</p>
+                                                <button onclick="app.joinTraining('${training.id}')">
+                                                    ✅ Присоединиться
+                                                </button>
+                                                <button onclick="app.viewParticipants('${training.id}')" style="background: #6c757d; margin-top: 5px;">
+                                                    👥 Участники
                                                 </button>
                                             </div>
                                         `);
-                                    markers.value.push(marker);
+                                        trainingMarkers.value.push(marker);
+                                    }
+                                } catch (error) {
+                                    console.error('Error creating training marker:', error);
                                 }
-                            } catch (error) {
-                                console.error('Error creating event marker:', error);
-                            }
-                        });
-                    } else if (activeMode.value === 'trainings') {
-                        // Add training markers
-                        trainings.value.forEach(training => {
-                            try {
-                                if (training.lat && training.lng) {
-                                    const marker = L.marker([training.lat, training.lng], {
-                                        icon: L.divIcon({
-                                            className: 'training-marker',
-                                            html: '💪',
-                                            iconSize: [30, 30]
-                                        })
-                                    })
-                                    .addTo(map.value)
-                                    .bindPopup(`
-                                        <div class="training-popup">
-                                            <h4>${training.title}</h4>
-                                            <p>${training.comment || 'Присоединяйтесь к тренировке!'}</p>
-                                            <p><strong>👤 Организатор:</strong> ${training.user_name}</p>
-                                            <p><strong>🏃 Спорт:</strong> ${training.sport}</p>
-                                            <p><strong>⏰ Время:</strong> ${formatTime(training.start_time)}</p>
-                                            <p><strong>👥 Участников:</strong> ${training.participants_count || 0}</p>
-                                            <button onclick="app.joinTraining('${training.id}')">
-                                                ✅ Присоединиться
-                                            </button>
-                                            <button onclick="app.viewParticipants('${training.id}')" style="background: #6c757d; margin-top: 5px;">
-                                                👥 Участники
-                                            </button>
-                                        </div>
-                                    `);
-                                    trainingMarkers.value.push(marker);
-                                }
-                            } catch (error) {
-                                console.error('Error creating training marker:', error);
-                            }
-                        });
+                            });
+                        }
 
-                        // Add promoted locations markers
-                        promotedLocations.value.forEach(location => {
-                            try {
-                                if (location.lat && location.lng) {
-                                    const marker = L.marker([location.lat, location.lng], {
-                                        icon: L.divIcon({
-                                            className: 'promo-marker',
-                                            html: '🔥',
-                                            iconSize: [25, 25]
-                                        })
-                                    })
-                                    .addTo(map.value)
-                                    .bindPopup(`
-                                        <div class="training-popup">
-                                            <div class="promo-location">
-                                                <h4>${location.title}</h4>
-                                                <p>${location.description}</p>
-                                                <p><strong>${location.promo_text}</strong></p>
-                                                <button onclick="app.usePromoLocation(${location.lat}, ${location.lng})">
-                                                    🎯 Создать тренировку здесь
-                                                </button>
-                                            </div>
-                                        </div>
-                                    `);
-                                    trainingMarkers.value.push(marker);
-                                }
-                            } catch (error) {
-                                console.error('Error creating promo marker:', error);
-                            }
-                        });
-                    }
-
-                    // Center map on user location if available
-                    if (userLocation.value) {
-                        map.value.setView([userLocation.value.lat, userLocation.value.lng], 12);
-                    }
-
-                    console.log(`Added ${markers.value.length + trainingMarkers.value.length} markers to map`);
+                        console.log(`Added ${markers.value.length + trainingMarkers.value.length} markers to map`);
+                    });
                 };
 
                 const requestLocation = () => {
@@ -405,9 +455,9 @@
                         selectedLocation.value = location; // Используем как выбранную локацию по умолчанию
                         console.log('User location updated:', location);
 
-                        if (map.value) {
+                        safeMapOperation(() => {
                             map.value.setView([location.lat, location.lng], 12);
-                        }
+                        });
 
                         // Обновляем локацию на сервере если делимся
                         if (isSharingLocation.value) {
@@ -455,13 +505,6 @@
                 };
 
                 const startQuiz = () => {
-                    // Проверяем, есть ли выбранная локация
-                    if (!selectedLocation.value) {
-                        alert('Сначала выберите локацию для тренировки на карте');
-                        startLocationSelection();
-                        return;
-                    }
-
                     newTraining.value = {
                         title: '',
                         sport: '',
@@ -474,10 +517,11 @@
                     quizStep.value = 1;
                     showQuiz.value = true;
                     creatingTraining.value = false;
+                    isSelectingLocation.value = false;
                 };
 
                 const nextQuizStep = () => {
-                    if (quizStep.value < 5) {
+                    if (quizStep.value < 6) {
                         quizStep.value++;
                     } else {
                         createTraining();
@@ -490,20 +534,14 @@
                     }
                 };
 
-                const usePromoLocation = (lat, lng) => {
-                    selectedLocation.value = { lat, lng };
-
-                    // Добавляем маркер на карту
-                    if (locationMarker.value) {
-                        map.value.removeLayer(locationMarker.value);
+                const useCurrentLocation = async () => {
+                    try {
+                        const location = await updateLocation();
+                        selectedLocation.value = location;
+                        alert('📍 Используется ваше текущее местоположение');
+                    } catch (error) {
+                        console.error('Error getting current location:', error);
                     }
-                    locationMarker.value = L.marker([lat, lng])
-                        .addTo(map.value)
-                        .bindPopup('📍 Рекомендованная локация')
-                        .openPopup();
-
-                    map.value.setView([lat, lng], 14);
-                    startQuiz();
                 };
 
                 const createTraining = async () => {
@@ -517,8 +555,9 @@
 
                         // Валидация данных
                         if (!selectedLocation.value) {
-                            alert('❌ Сначала выберите локацию на карте');
+                            alert('❌ Сначала выберите локацию для тренировки');
                             creatingTraining.value = false;
+                            quizStep.value = 3; // Вернуться к шагу выбора локации
                             return;
                         }
 
@@ -734,7 +773,11 @@
 
                     // Автоматически определяем локацию для раздела тренировок
                     if (activeMode.value === 'trainings') {
-                        setTimeout(autoDetectLocation, 1000);
+                        setTimeout(() => {
+                            autoDetectLocation();
+                            // Центрируем на премиум тренировке через 2 секунды
+                            setTimeout(centerOnPremiumTraining, 2000);
+                        }, 1000);
                     }
                 });
 
@@ -746,6 +789,8 @@
 
                     if (newMode === 'trainings') {
                         autoDetectLocation();
+                        // Центрируем на премиум тренировке
+                        setTimeout(centerOnPremiumTraining, 1000);
                     }
 
                     const newUrl = new URL(window.location);
@@ -762,7 +807,6 @@
                 // Expose methods to global scope for popup buttons
                 window.app = {
                     joinTraining,
-                    usePromoLocation,
                     viewParticipants,
                     joinEvent
                 };
@@ -773,7 +817,7 @@
                     activeMode,
                     events,
                     trainings,
-                    promotedLocations,
+                    premiumTraining,
                     loading,
                     userLocation,
                     selectedLocation,
@@ -794,12 +838,13 @@
                     startQuiz,
                     nextQuizStep,
                     prevQuizStep,
-                    usePromoLocation,
                     joinTraining,
                     viewParticipants,
                     startLocationSharing,
                     stopLocationSharing,
                     startLocationSelection,
+                    useCurrentLocation,
+                    centerOnPremiumTraining,
                     formatTime,
                     getCurrentDateTime
                 };
@@ -891,12 +936,12 @@
                             📍 {{ userLocation ? 'Обновить' : 'Определить район' }}
                         </button>
 
-                        <button @click="startLocationSelection" class="location-btn" style="background: #17a2b8;">
-                            🗺️ Выбрать на карте
-                        </button>
-
                         <button @click="startQuiz" class="location-btn" style="background: #ff6b6b;">
                             ➕ Создать тренировку
+                        </button>
+
+                        <button @click="centerOnPremiumTraining" class="location-btn" style="background: #ffd700; color: #000;">
+                            👑 Премиум тренировка
                         </button>
 
                         <div v-if="isSharingLocation" style="display: flex; align-items: center; gap: 10px;">
@@ -937,7 +982,7 @@
 
                             <!-- Progress Bar -->
                             <div class="quiz-progress">
-                                <div class="quiz-progress-bar" :style="{ width: (quizStep / 5) * 100 + '%' }"></div>
+                                <div class="quiz-progress-bar" :style="{ width: (quizStep / 6) * 100 + '%' }"></div>
                             </div>
 
                             <!-- Step 1: Название -->
@@ -982,9 +1027,37 @@
                                 </div>
                             </div>
 
-                            <!-- Step 3: Время -->
+                            <!-- Step 3: Выбор локации -->
                             <div class="quiz-step" :class="{ active: quizStep === 3 }">
-                                <h4>Шаг 3: Время тренировки</h4>
+                                <h4>Шаг 3: Выберите место тренировки</h4>
+                                <div class="location-selection-step">
+                                    <p><strong>Выберите где будет проходить тренировка:</strong></p>
+
+                                    <div style="display: flex; flex-direction: column; gap: 10px; margin: 15px 0;">
+                                        <button @click="useCurrentLocation" class="location-btn">
+                                            📍 Использовать мое местоположение
+                                        </button>
+
+                                        <button @click="startLocationSelection" class="location-btn" style="background: #17a2b8;">
+                                            🗺️ Выбрать на карте
+                                        </button>
+                                    </div>
+
+                                    <div v-if="selectedLocation" style="background: #e8f5e8; padding: 10px; border-radius: 5px; margin-top: 10px;">
+                                        <strong>📍 Выбранная локация:</strong><br>
+                                        Широта: {{ selectedLocation.lat.toFixed(6) }}<br>
+                                        Долгота: {{ selectedLocation.lng.toFixed(6) }}
+                                    </div>
+                                </div>
+                                <div class="quiz-navigation">
+                                    <button @click="prevQuizStep" class="location-btn" style="background: #6c757d;">Назад</button>
+                                    <button @click="nextQuizStep" class="location-btn" :disabled="!selectedLocation">Далее</button>
+                                </div>
+                            </div>
+
+                            <!-- Step 4: Время -->
+                            <div class="quiz-step" :class="{ active: quizStep === 4 }">
+                                <h4>Шаг 4: Время тренировки</h4>
                                 <div class="form-group">
                                     <label for="startTime" class="form-label">Время начала:</label>
                                     <input
@@ -1017,9 +1090,9 @@
                                 </div>
                             </div>
 
-                            <!-- Step 4: Дополнительно -->
-                            <div class="quiz-step" :class="{ active: quizStep === 4 }">
-                                <h4>Шаг 4: Дополнительная информация</h4>
+                            <!-- Step 5: Дополнительно -->
+                            <div class="quiz-step" :class="{ active: quizStep === 5 }">
+                                <h4>Шаг 5: Дополнительная информация</h4>
                                 <div class="form-group">
                                     <label for="trainingComment" class="form-label">Описание тренировки:</label>
                                     <textarea
@@ -1059,9 +1132,7 @@
 
                                 <div class="quiz-navigation">
                                     <button @click="prevQuizStep" class="location-btn" style="background: #6c757d;">Назад</button>
-                                    <button @click="nextQuizStep" class="location-btn" :disabled="creatingTraining">
-                                        {{ creatingTraining ? 'Создание...' : 'Создать' }}
-                                    </button>
+                                    <button @click="nextQuizStep" class="location-btn">Создать тренировку</button>
                                 </div>
                             </div>
                         </div>
