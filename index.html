@@ -8,49 +8,301 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        body { margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: #f5f5f5; }
-        .app-container { height: 100vh; display: flex; flex-direction: column; background: white; }
-        .app-header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px; text-align: center; }
-        .app-header h1 { margin: 0; font-size: 1.5rem; }
-        .mode-selector { display: flex; background: #f8f9fa; border-bottom: 1px solid #dee2e6; }
-        .mode-button { flex: 1; padding: 12px; border: none; background: none; cursor: pointer; transition: all 0.3s ease; font-weight: 500; }
-        .mode-button.active { background: #007bff; color: white; border-bottom: 3px solid #0056b3; }
-        .mode-button:hover:not(.active) { background: #e9ecef; }
-        .filters-panel { padding: 15px; background: white; border-bottom: 1px solid #dee2e6; display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
-        .filter-select { padding: 8px 12px; border: 1px solid #ced4da; border-radius: 6px; background: white; }
-        .location-btn { background: #28a745; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; gap: 5px; }
-        .location-btn:hover { background: #218838; }
-        .location-btn:disabled { background: #6c757d; cursor: not-allowed; }
-        .map-container { flex: 1; min-height: 400px; position: relative; }
-        .event-popup, .training-popup { max-width: 280px; }
-        .event-popup h4, .training-popup h4 { margin: 0 0 10px 0; color: #333; font-size: 16px; }
-        .event-popup p, .training-popup p { margin: 5px 0; color: #666; font-size: 14px; }
-        .event-popup button, .training-popup button { background: #007bff; color: white; border: none; padding: 10px 16px; border-radius: 6px; cursor: pointer; width: 100%; margin-top: 10px; }
-        .event-popup button:hover, .training-popup button:hover { background: #0056b3; }
-        .user-profile-panel { padding: 15px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-bottom: 1px solid #dee2e6; }
-        .loading { display: flex; justify-content: center; align-items: center; height: 200px; color: #666; flex-direction: column; gap: 10px; }
-        .spinner { border: 3px solid #f3f3f3; border-top: 3px solid #007bff; border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; }
-        .quiz-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); display: flex; align-items: center; justify-content: center; z-index: 1000; }
-        .quiz-container { background: white; padding: 20px; border-radius: 10px; max-width: 500px; width: 90%; max-height: 90vh; overflow-y: auto; }
-        .quiz-step { display: none; }
-        .quiz-step.active { display: block; }
-        .promo-location { border: 2px solid #ff6b6b; background: #fff5f5; padding: 10px; margin: 10px 0; border-radius: 8px; }
-        .premium-training { border: 3px solid gold; background: linear-gradient(135deg, #fff9c4, #ffeb3b); padding: 15px; margin: 10px 0; border-radius: 10px; position: relative; }
-        .premium-badge { position: absolute; top: -10px; right: -10px; background: gold; color: #000; padding: 5px 10px; border-radius: 15px; font-weight: bold; font-size: 12px; }
-        .participant-list { max-height: 200px; overflow-y: auto; border: 1px solid #ddd; padding: 10px; border-radius: 5px; margin-top: 10px; }
-        .participant-item { display: flex; align-items: center; gap: 10px; padding: 5px 0; border-bottom: 1px solid #eee; }
-        .participant-avatar { width: 30px; height: 30px; border-radius: 50%; background: #667eea; display: flex; align-items: center; justify-content: center; color: white; font-size: 14px; }
-        .quiz-navigation { display: flex; justify-content: space-between; margin-top: 20px; }
-        .quiz-progress { height: 5px; background: #e9ecef; border-radius: 3px; margin-bottom: 15px; }
-        .quiz-progress-bar { height: 100%; background: #007bff; border-radius: 3px; transition: width 0.3s ease; }
-        .form-group { margin-bottom: 15px; }
-        .form-label { display: block; margin-bottom: 5px; font-weight: 500; }
-        .location-marker { background: #ff6b6b; color: white; padding: 8px 12px; border-radius: 20px; font-weight: bold; border: 2px solid white; box-shadow: 0 2px 10px rgba(0,0,0,0.2); }
-        .map-controls { position: absolute; top: 10px; right: 10px; z-index: 1000; display: flex; flex-direction: column; gap: 5px; }
-        .map-control-btn { background: white; border: 1px solid #ccc; border-radius: 4px; padding: 8px 12px; cursor: pointer; font-size: 14px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        .map-control-btn:hover { background: #f8f9fa; }
-        .location-selection-step { border: 2px dashed #007bff; padding: 15px; border-radius: 8px; margin: 10px 0; background: #f8f9fa; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        /* Исправленные CSS свойства для кроссбраузерности */
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #f5f5f5;
+            user-select: none;
+            -webkit-user-select: none;
+            text-size-adjust: 100%;
+            -webkit-text-size-adjust: 100%;
+        }
+        .app-container {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background: white;
+        }
+        .app-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            text-align: center;
+        }
+        .app-header h1 {
+            margin: 0;
+            font-size: 1.5rem;
+        }
+        .mode-selector {
+            display: flex;
+            background: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
+        }
+        .mode-button {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            background: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+        .mode-button.active {
+            background: #007bff;
+            color: white;
+            border-bottom: 3px solid #0056b3;
+        }
+        .mode-button:hover:not(.active) {
+            background: #e9ecef;
+        }
+        .filters-panel {
+            padding: 15px;
+            background: white;
+            border-bottom: 1px solid #dee2e6;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        .filter-select {
+            padding: 8px 12px;
+            border: 1px solid #ced4da;
+            border-radius: 6px;
+            background: white;
+        }
+        .location-btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .location-btn:hover {
+            background: #218838;
+        }
+        .location-btn:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+        }
+        .map-container {
+            flex: 1;
+            min-height: 400px;
+            position: relative;
+        }
+        .event-popup, .training-popup {
+            max-width: 280px;
+        }
+        .event-popup h4, .training-popup h4 {
+            margin: 0 0 10px 0;
+            color: #333;
+            font-size: 16px;
+        }
+        .event-popup p, .training-popup p {
+            margin: 5px 0;
+            color: #666;
+            font-size: 14px;
+        }
+        .event-popup button, .training-popup button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 10px;
+        }
+        .event-popup button:hover, .training-popup button:hover {
+            background: #0056b3;
+        }
+        .user-profile-panel {
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-bottom: 1px solid #dee2e6;
+        }
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 200px;
+            color: #666;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #007bff;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+        }
+        .quiz-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        .quiz-container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        .quiz-step {
+            display: none;
+        }
+        .quiz-step.active {
+            display: block;
+        }
+        .promo-location {
+            border: 2px solid #ff6b6b;
+            background: #fff5f5;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 8px;
+        }
+        .premium-training {
+            border: 3px solid gold;
+            background: linear-gradient(135deg, #fff9c4, #ffeb3b);
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 10px;
+            position: relative;
+        }
+        .premium-badge {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            background: gold;
+            color: #000;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-weight: bold;
+            font-size: 12px;
+        }
+        .participant-list {
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+        .participant-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 5px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .participant-avatar {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: #667eea;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 14px;
+        }
+        .quiz-navigation {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+        .quiz-progress {
+            height: 5px;
+            background: #e9ecef;
+            border-radius: 3px;
+            margin-bottom: 15px;
+        }
+        .quiz-progress-bar {
+            height: 100%;
+            background: #007bff;
+            border-radius: 3px;
+            transition: width 0.3s ease;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+        .location-marker {
+            background: #ff6b6b;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 20px;
+            font-weight: bold;
+            border: 2px solid white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+        .map-controls {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        .map-control-btn {
+            background: white;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            padding: 8px 12px;
+            cursor: pointer;
+            font-size: 14px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .map-control-btn:hover {
+            background: #f8f9fa;
+        }
+        .location-selection-step {
+            border: 2px dashed #007bff;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            background: #f8f9fa;
+        }
+        .location-info {
+            background: #e8f5e8;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+        .map-mini-container {
+            height: 300px;
+            margin: 15px 0;
+            border: 2px solid #007bff;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body>
@@ -74,9 +326,11 @@
                 const isSharingLocation = ref(false);
                 const userComment = ref('');
                 const map = ref(null);
+                const selectionMap = ref(null); // Отдельная карта для выбора локации
                 const markers = ref([]);
                 const trainingMarkers = ref([]);
                 const locationMarker = ref(null);
+                const selectionMarker = ref(null);
                 const telegramUser = ref(null);
                 const creatingTraining = ref(false);
                 const isSelectingLocation = ref(false);
@@ -118,8 +372,8 @@
                     }
                 };
 
-                const safeMapOperation = (operation) => {
-                    if (!map.value) {
+                const safeMapOperation = (mapInstance, operation) => {
+                    if (!mapInstance) {
                         console.warn('Map not initialized');
                         return;
                     }
@@ -130,91 +384,9 @@
                     }
                 };
 
-                const loadEvents = async () => {
-                    if (activeMode.value !== 'events') return;
-
-                    loading.value = true;
-                    try {
-                        const params = new URLSearchParams();
-                        if (eventFilters.value.sport) params.append('sport', eventFilters.value.sport);
-                        if (userLocation.value) {
-                            params.append('lat', userLocation.value.lat);
-                            params.append('lng', userLocation.value.lng);
-                            params.append('radius', eventFilters.value.radius);
-                        }
-
-                        const response = await fetch(`${BACKEND_URL}/api/events?${params}`);
-                        const result = await response.json();
-                        if (result.status === "success") {
-                            events.value = result.data;
-                        } else {
-                            throw new Error(result.message || 'Failed to load events');
-                        }
-                        updateMapMarkers();
-                    } catch (error) {
-                        console.error('Failed to load events:', error);
-                        events.value = getMockEvents();
-                        updateMapMarkers();
-                    } finally {
-                        loading.value = false;
-                    }
-                };
-
-                const loadTrainings = async () => {
-                    if (activeMode.value !== 'trainings') return;
-
-                    loading.value = true;
-                    try {
-                        const params = new URLSearchParams();
-                        if (trainingFilters.value.sport) params.append('sport', trainingFilters.value.sport);
-                        if (userLocation.value) {
-                            params.append('lat', userLocation.value.lat);
-                            params.append('lng', userLocation.value.lng);
-                            params.append('radius', trainingFilters.value.radius);
-                        }
-
-                        console.log('Loading trainings with params:', params.toString());
-                        const response = await fetch(`${BACKEND_URL}/api/trainings?${params}`);
-                        const result = await response.json();
-                        console.log('Trainings response:', result);
-
-                        if (result.status === "success") {
-                            trainings.value = result.data;
-                            console.log('Loaded trainings:', trainings.value);
-                        } else {
-                            throw new Error(result.message || 'Failed to load trainings');
-                        }
-
-                        // Загружаем премиум тренировку
-                        await loadPremiumTraining();
-
-                        updateMapMarkers();
-                    } catch (error) {
-                        console.error('Failed to load trainings:', error);
-                        trainings.value = getMockTrainings();
-                        updateMapMarkers();
-                    } finally {
-                        loading.value = false;
-                    }
-                };
-
-                const loadPremiumTraining = async () => {
-                    try {
-                        const response = await fetch(`${BACKEND_URL}/api/premium-training`);
-                        const result = await response.json();
-                        if (result.status === "success") {
-                            premiumTraining.value = result.data;
-                            console.log('Loaded premium training:', premiumTraining.value);
-                        }
-                    } catch (error) {
-                        console.error('Failed to load premium training:', error);
-                    }
-                };
-
                 const initMap = () => {
-                    console.log('Initializing map...');
+                    console.log('Initializing main map...');
 
-                    // Создаем карту с задержкой для гарантии инициализации DOM
                     setTimeout(() => {
                         const mapElement = document.getElementById('map');
                         if (!mapElement) {
@@ -229,85 +401,125 @@
                         }
 
                         map.value = L.map('map', {
-                            zoomControl: false,
-                            scrollWheelZoom: true
+                            zoomControl: true,
+                            scrollWheelZoom: true,
+                            dragging: true
                         }).setView([55.7558, 37.6173], 10);
 
                         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                             attribution: '© OpenStreetMap contributors'
                         }).addTo(map.value);
 
-                        // Добавляем zoom control в нужное место
-                        L.control.zoom({
-                            position: 'topright'
-                        }).addTo(map.value);
-
-                        // Добавляем обработчик клика по карте для выбора локации
-                        map.value.on('click', function(e) {
-                            if (isSelectingLocation.value) {
-                                selectLocationOnMap(e.latlng);
-                            }
-                        });
-
-                        // Отключаем анимацию для предотвращения ошибок
+                        // Упрощенная анимация зума
+                        const originalAnimateZoom = map.value._animateZoom;
                         map.value._animateZoom = function(center, zoom, startZoom, startScale) {
                             try {
-                                // Простая реализация без сложной анимации
-                                this._move(center, zoom, startScale, true);
-                            } catch (error) {
-                                console.warn('Zoom animation error:', error);
                                 this._move(center, zoom);
+                            } catch (error) {
+                                console.warn('Zoom animation simplified');
+                                this.setView(center, zoom, { animate: false });
                             }
                         };
 
-                        console.log('Map initialized successfully');
+                        console.log('Main map initialized successfully');
                         loadData();
                     }, 100);
                 };
 
-                const centerOnPremiumTraining = () => {
-                    if (premiumTraining.value && map.value) {
-                        safeMapOperation(() => {
-                            map.value.setView([premiumTraining.value.lat, premiumTraining.value.lng], 13);
-                        });
-                    }
+                const initSelectionMap = () => {
+                    return new Promise((resolve) => {
+                        console.log('Initializing selection map...');
+
+                        setTimeout(() => {
+                            const container = document.getElementById('selection-map-container');
+                            if (!container) {
+                                console.error('Selection map container not found');
+                                resolve(null);
+                                return;
+                            }
+
+                            // Очищаем контейнер
+                            container.innerHTML = '';
+
+                            // Создаем карту для выбора локации
+                            const selectionMapInstance = L.map('selection-map-container', {
+                                zoomControl: true,
+                                scrollWheelZoom: true,
+                                dragging: true
+                            });
+
+                            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                                attribution: '© OpenStreetMap contributors'
+                            }).addTo(selectionMapInstance);
+
+                            // Устанавливаем начальную позицию
+                            const initialLat = userLocation.value?.lat || 55.7558;
+                            const initialLng = userLocation.value?.lng || 37.6173;
+                            selectionMapInstance.setView([initialLat, initialLng], 13);
+
+                            // Добавляем обработчик клика
+                            selectionMapInstance.on('click', function(e) {
+                                selectLocationOnMap(e.latlng, selectionMapInstance);
+                            });
+
+                            console.log('Selection map initialized');
+                            resolve(selectionMapInstance);
+                        }, 500);
+                    });
                 };
 
-                const selectLocationOnMap = (latlng) => {
+                const selectLocationOnMap = (latlng, mapInstance) => {
                     selectedLocation.value = {
                         lat: latlng.lat,
                         lng: latlng.lng
                     };
 
                     // Удаляем предыдущий маркер
-                    if (locationMarker.value) {
-                        safeMapOperation(() => {
-                            map.value.removeLayer(locationMarker.value);
-                        });
-                    }
+                    safeMapOperation(mapInstance, () => {
+                        if (selectionMarker.value) {
+                            mapInstance.removeLayer(selectionMarker.value);
+                        }
 
-                    // Добавляем новый маркер
-                    safeMapOperation(() => {
-                        locationMarker.value = L.marker([latlng.lat, latlng.lng])
-                            .addTo(map.value)
+                        // Добавляем новый маркер
+                        selectionMarker.value = L.marker([latlng.lat, latlng.lng])
+                            .addTo(mapInstance)
                             .bindPopup('📍 Выбранная локация для тренировки')
                             .openPopup();
 
                         // Центрируем карту на выбранной локации
-                        map.value.setView([latlng.lat, latlng.lng], 14);
+                        mapInstance.setView([latlng.lat, latlng.lng], 14);
                     });
 
-                    alert(`📍 Локация выбрана! Широта: ${latlng.lat.toFixed(6)}, Долгота: ${latlng.lng.toFixed(6)}`);
-                    isSelectingLocation.value = false;
+                    console.log('Location selected:', selectedLocation.value);
                 };
 
-                const startLocationSelection = () => {
+                const startLocationSelection = async () => {
                     isSelectingLocation.value = true;
-                    alert('🗺️ Нажмите на карту, чтобы выбрать место для тренировки');
+
+                    // Ждем следующего тика для обновления DOM
+                    await nextTick();
+
+                    // Инициализируем карту выбора
+                    selectionMap.value = await initSelectionMap();
+
+                    if (selectionMap.value) {
+                        alert('🗺️ Нажмите на карту, чтобы выбрать место для тренировки');
+                    } else {
+                        alert('❌ Не удалось загрузить карту для выбора локации');
+                        isSelectingLocation.value = false;
+                    }
+                };
+
+                const centerOnPremiumTraining = () => {
+                    if (premiumTraining.value && map.value) {
+                        safeMapOperation(map.value, () => {
+                            map.value.setView([premiumTraining.value.lat, premiumTraining.value.lng], 13);
+                        });
+                    }
                 };
 
                 const updateMapMarkers = () => {
-                    safeMapOperation(() => {
+                    safeMapOperation(map.value, () => {
                         // Clear old markers
                         markers.value.forEach(marker => {
                             if (marker) {
@@ -385,7 +597,7 @@
                             // Add regular training markers
                             trainings.value.forEach(training => {
                                 try {
-                                    if (training.lat && training.lng) {
+                                    if (training.lat && training.lng && !training.is_premium) {
                                         const marker = L.marker([training.lat, training.lng], {
                                             icon: L.divIcon({
                                                 className: 'training-marker',
@@ -422,6 +634,7 @@
                     });
                 };
 
+                // Остальные методы остаются без изменений...
                 const requestLocation = () => {
                     return new Promise((resolve, reject) => {
                         if (!navigator.geolocation) {
@@ -452,17 +665,12 @@
                     try {
                         const location = await requestLocation();
                         userLocation.value = location;
-                        selectedLocation.value = location; // Используем как выбранную локацию по умолчанию
+                        selectedLocation.value = location;
                         console.log('User location updated:', location);
 
-                        safeMapOperation(() => {
+                        safeMapOperation(map.value, () => {
                             map.value.setView([location.lat, location.lng], 12);
                         });
-
-                        // Обновляем локацию на сервере если делимся
-                        if (isSharingLocation.value) {
-                            await updateLocationOnServer(location);
-                        }
 
                         await loadData();
                         return location;
@@ -470,26 +678,6 @@
                         console.error('Error getting location:', error);
                         alert('Не удалось получить геолокацию. Проверьте разрешения в браузере.');
                         throw error;
-                    }
-                };
-
-                const updateLocationOnServer = async (location) => {
-                    try {
-                        if (telegramUser.value) {
-                            await fetch(`${BACKEND_URL}/api/users/location`, {
-                                method: 'POST',
-                                headers: {
-                                    'Content-Type': 'application/json',
-                                },
-                                body: JSON.stringify({
-                                    user_id: telegramUser.value.id,
-                                    lat: location.lat,
-                                    lng: location.lng
-                                })
-                            });
-                        }
-                    } catch (error) {
-                        console.error('Error updating location on server:', error);
                     }
                 };
 
@@ -520,11 +708,17 @@
                     isSelectingLocation.value = false;
                 };
 
-                const nextQuizStep = () => {
+                const nextQuizStep = async () => {
                     if (quizStep.value < 6) {
                         quizStep.value++;
+
+                        // Если переходим к шагу выбора локации, инициализируем карту
+                        if (quizStep.value === 3) {
+                            await nextTick();
+                            selectionMap.value = await initSelectionMap();
+                        }
                     } else {
-                        createTraining();
+                        await createTraining();
                     }
                 };
 
@@ -557,7 +751,7 @@
                         if (!selectedLocation.value) {
                             alert('❌ Сначала выберите локацию для тренировки');
                             creatingTraining.value = false;
-                            quizStep.value = 3; // Вернуться к шагу выбора локации
+                            quizStep.value = 3;
                             return;
                         }
 
@@ -613,6 +807,11 @@
                         if (result.status === "success") {
                             alert('✅ Тренировка создана!');
                             showQuiz.value = false;
+                            // Очищаем карту выбора
+                            if (selectionMap.value) {
+                                selectionMap.value.remove();
+                                selectionMap.value = null;
+                            }
                             await loadTrainings();
                         } else {
                             throw new Error(result.message || 'Failed to create training');
@@ -622,6 +821,72 @@
                         alert('❌ Не удалось создать тренировку: ' + error.message);
                     } finally {
                         creatingTraining.value = false;
+                    }
+                };
+
+                const loadEvents = async () => {
+                    if (activeMode.value !== 'events') return;
+                    loading.value = true;
+                    try {
+                        const params = new URLSearchParams();
+                        if (eventFilters.value.sport) params.append('sport', eventFilters.value.sport);
+                        if (userLocation.value) {
+                            params.append('lat', userLocation.value.lat);
+                            params.append('lng', userLocation.value.lng);
+                            params.append('radius', eventFilters.value.radius);
+                        }
+
+                        const response = await fetch(`${BACKEND_URL}/api/events?${params}`);
+                        const result = await response.json();
+                        if (result.status === "success") {
+                            events.value = result.data;
+                        }
+                        updateMapMarkers();
+                    } catch (error) {
+                        console.error('Failed to load events:', error);
+                    } finally {
+                        loading.value = false;
+                    }
+                };
+
+                const loadTrainings = async () => {
+                    if (activeMode.value !== 'trainings') return;
+                    loading.value = true;
+                    try {
+                        const params = new URLSearchParams();
+                        if (trainingFilters.value.sport) params.append('sport', trainingFilters.value.sport);
+                        if (userLocation.value) {
+                            params.append('lat', userLocation.value.lat);
+                            params.append('lng', userLocation.value.lng);
+                            params.append('radius', trainingFilters.value.radius);
+                        }
+
+                        const response = await fetch(`${BACKEND_URL}/api/trainings?${params}`);
+                        const result = await response.json();
+                        if (result.status === "success") {
+                            trainings.value = result.data;
+                        }
+
+                        // Загружаем премиум тренировку
+                        const premiumResponse = await fetch(`${BACKEND_URL}/api/premium-training`);
+                        const premiumResult = await premiumResponse.json();
+                        if (premiumResult.status === "success") {
+                            premiumTraining.value = premiumResult.data;
+                        }
+
+                        updateMapMarkers();
+                    } catch (error) {
+                        console.error('Failed to load trainings:', error);
+                    } finally {
+                        loading.value = false;
+                    }
+                };
+
+                const loadData = () => {
+                    if (activeMode.value === 'events') {
+                        return loadEvents();
+                    } else if (activeMode.value === 'trainings') {
+                        return loadTrainings();
                     }
                 };
 
@@ -647,11 +912,6 @@
                         if (result.status === "success") {
                             alert('✅ ' + result.message);
                             isSharingLocation.value = true;
-                            if (userLocation.value) {
-                                await updateLocationOnServer(userLocation.value);
-                            }
-                        } else {
-                            throw new Error(result.message || 'Failed to join training');
                         }
                     } catch (error) {
                         console.error('Error joining training:', error);
@@ -681,32 +941,6 @@
                     alert('Вы присоединились к мероприятию!');
                 };
 
-                const startLocationSharing = async () => {
-                    try {
-                        const location = await updateLocation();
-                        isSharingLocation.value = true;
-                        await updateLocationOnServer(location);
-                        alert('✅ Теперь вы делитесь своей геолокацией с участниками тренировок!');
-                    } catch (error) {
-                        console.error('Error starting location sharing:', error);
-                        alert('❌ Не удалось начать делиться геолокацией');
-                    }
-                };
-
-                const stopLocationSharing = () => {
-                    isSharingLocation.value = false;
-                    alert('🔒 Вы больше не делитесь геолокацией');
-                };
-
-                const loadData = () => {
-                    if (activeMode.value === 'events') {
-                        return loadEvents();
-                    } else if (activeMode.value === 'trainings') {
-                        return loadTrainings();
-                    }
-                };
-
-                // Helper functions
                 const formatTime = (timeString) => {
                     try {
                         return new Date(timeString).toLocaleTimeString('ru-RU', {
@@ -723,37 +957,6 @@
                     return now.toISOString().slice(0, 16);
                 };
 
-                const getMockEvents = () => {
-                    return [
-                        {
-                            id: 1,
-                            title: "Московский марафон 2024",
-                            description: "Ежегодный осенний марафон через центр Москвы",
-                            sport: "бег",
-                            date: "2024-09-15",
-                            location: "Москва, Воробьевы горы",
-                            lat: 55.710,
-                            lng: 37.553
-                        }
-                    ];
-                };
-
-                const getMockTrainings = () => {
-                    return [
-                        {
-                            id: "training_1",
-                            title: "Утренняя пробежка",
-                            sport: "бег",
-                            lat: 55.7558,
-                            lng: 37.6173,
-                            start_time: new Date().toISOString(),
-                            user_name: "Алексей",
-                            participants_count: 3,
-                            comment: "Присоединяйтесь к утренней пробежке!"
-                        }
-                    ];
-                };
-
                 const getUrlParams = () => {
                     const urlParams = new URLSearchParams(window.location.search);
                     const mode = urlParams.get('mode');
@@ -766,16 +969,13 @@
                     initTelegramApp();
                     activeMode.value = getUrlParams();
 
-                    // Инициализируем карту с задержкой
                     setTimeout(() => {
                         initMap();
                     }, 500);
 
-                    // Автоматически определяем локацию для раздела тренировок
                     if (activeMode.value === 'trainings') {
                         setTimeout(() => {
                             autoDetectLocation();
-                            // Центрируем на премиум тренировке через 2 секунды
                             setTimeout(centerOnPremiumTraining, 2000);
                         }, 1000);
                     }
@@ -789,7 +989,6 @@
 
                     if (newMode === 'trainings') {
                         autoDetectLocation();
-                        // Центрируем на премиум тренировке
                         setTimeout(centerOnPremiumTraining, 1000);
                     }
 
@@ -802,9 +1001,8 @@
                 watch(() => eventFilters.value.radius, loadEvents);
                 watch(() => trainingFilters.value.sport, loadTrainings);
                 watch(() => trainingFilters.value.radius, loadTrainings);
-                watch(userLocation, loadData);
 
-                // Expose methods to global scope for popup buttons
+                // Expose methods to global scope
                 window.app = {
                     joinTraining,
                     viewParticipants,
@@ -813,7 +1011,6 @@
 
                 // Return template data
                 return {
-                    // State
                     activeMode,
                     events,
                     trainings,
@@ -822,7 +1019,6 @@
                     userLocation,
                     selectedLocation,
                     isSharingLocation,
-                    userComment,
                     telegramUser,
                     eventFilters,
                     trainingFilters,
@@ -832,7 +1028,6 @@
                     creatingTraining,
                     isSelectingLocation,
 
-                    // Methods
                     updateLocation,
                     loadData,
                     startQuiz,
@@ -840,8 +1035,6 @@
                     prevQuizStep,
                     joinTraining,
                     viewParticipants,
-                    startLocationSharing,
-                    stopLocationSharing,
                     startLocationSelection,
                     useCurrentLocation,
                     centerOnPremiumTraining,
@@ -895,62 +1088,41 @@
                         </div>
                     </div>
 
-                    <!-- Filters for Events -->
+                    <!-- Filters -->
                     <div v-if="activeMode === 'events'" class="filters-panel">
                         <select v-model="eventFilters.sport" class="filter-select" title="Выберите вид спорта" name="eventSport">
                             <option value="">Все виды спорта</option>
                             <option value="бег">🏃 Бег</option>
                             <option value="велоспорт">🚴 Велоспорт</option>
-                            <option value="лыжи">⛷️ Лыжи</option>
                         </select>
-
                         <select v-model="eventFilters.radius" class="filter-select" :disabled="!userLocation" title="Радиус поиска" name="eventRadius">
                             <option value="5">5 км</option>
                             <option value="10">10 км</option>
-                            <option value="25">25 км</option>
                         </select>
-
                         <button @click="updateLocation()" class="location-btn">
                             📍 {{ userLocation ? 'Обновить' : 'Мое местоположение' }}
                         </button>
                     </div>
 
-                    <!-- Filters for Trainings -->
                     <div v-if="activeMode === 'trainings'" class="filters-panel">
                         <select v-model="trainingFilters.sport" class="filter-select" title="Выберите вид спорта" name="trainingSport">
                             <option value="">Любой вид спорта</option>
                             <option value="бег">🏃 Бег</option>
                             <option value="велоспорт">🚴 Велоспорт</option>
-                            <option value="йога">🧘 Йога</option>
-                            <option value="футбол">⚽ Футбол</option>
                         </select>
-
                         <select v-model="trainingFilters.radius" class="filter-select" title="Радиус поиска тренировок" name="trainingRadius">
-                            <option value="1">1 км</option>
                             <option value="3">3 км</option>
                             <option value="5">5 км</option>
-                            <option value="10">10 км</option>
                         </select>
-
                         <button @click="updateLocation()" class="location-btn">
                             📍 {{ userLocation ? 'Обновить' : 'Определить район' }}
                         </button>
-
                         <button @click="startQuiz" class="location-btn" style="background: #ff6b6b;">
                             ➕ Создать тренировку
                         </button>
-
                         <button @click="centerOnPremiumTraining" class="location-btn" style="background: #ffd700; color: #000;">
                             👑 Премиум тренировка
                         </button>
-
-                        <div v-if="isSharingLocation" style="display: flex; align-items: center; gap: 10px;">
-                            <span style="color: #28a745;">📍 Делитесь геолокацией</span>
-                            <button @click="stopLocationSharing" class="location-btn" style="background: #dc3545;">
-                                ❌ Остановить
-                            </button>
-                        </div>
-
                         <div v-if="selectedLocation" style="color: #666; font-size: 12px;">
                             📍 Локация: {{ selectedLocation.lat.toFixed(4) }}, {{ selectedLocation.lng.toFixed(4) }}
                         </div>
@@ -963,14 +1135,11 @@
                         <div v-else>Ищем тренировки поблизости...</div>
                     </div>
 
-                    <!-- Map -->
+                    <!-- Main Map -->
                     <div id="map" class="map-container">
                         <div class="map-controls">
                             <button @click="updateLocation" class="map-control-btn" title="Определить мое местоположение">
                                 📍 Моя локация
-                            </button>
-                            <button @click="startLocationSelection" class="map-control-btn" title="Выбрать точку на карте">
-                                🎯 Выбрать точку
                             </button>
                         </div>
                     </div>
@@ -980,7 +1149,6 @@
                         <div class="quiz-container">
                             <h3>Создание тренировки</h3>
 
-                            <!-- Progress Bar -->
                             <div class="quiz-progress">
                                 <div class="quiz-progress-bar" :style="{ width: (quizStep / 6) * 100 + '%' }"></div>
                             </div>
@@ -997,7 +1165,6 @@
                                         placeholder="Например: Утренняя пробежка в парке"
                                         class="filter-select"
                                         style="width: 100%; margin: 5px 0;"
-                                        title="Введите название тренировки"
                                     />
                                 </div>
                                 <div class="quiz-navigation">
@@ -1011,14 +1178,10 @@
                                 <h4>Шаг 2: Выберите вид спорта</h4>
                                 <div class="form-group">
                                     <label for="trainingSport" class="form-label">Вид спорта:</label>
-                                    <select id="trainingSport" name="trainingSport" v-model="newTraining.sport" class="filter-select" style="width: 100%; margin: 5px 0;" title="Выберите вид спорта">
+                                    <select id="trainingSport" name="trainingSport" v-model="newTraining.sport" class="filter-select" style="width: 100%; margin: 5px 0;">
                                         <option value="">Выберите спорт</option>
                                         <option value="бег">🏃 Бег</option>
                                         <option value="велоспорт">🚴 Велоспорт</option>
-                                        <option value="йога">🧘 Йога</option>
-                                        <option value="футбол">⚽ Футбол</option>
-                                        <option value="теннис">🎾 Теннис</option>
-                                        <option value="плавание">🏊 Плавание</option>
                                     </select>
                                 </div>
                                 <div class="quiz-navigation">
@@ -1043,7 +1206,12 @@
                                         </button>
                                     </div>
 
-                                    <div v-if="selectedLocation" style="background: #e8f5e8; padding: 10px; border-radius: 5px; margin-top: 10px;">
+                                    <!-- Контейнер для карты выбора -->
+                                    <div v-if="isSelectingLocation" class="map-mini-container">
+                                        <div id="selection-map-container" style="height: 100%; width: 100%;"></div>
+                                    </div>
+
+                                    <div v-if="selectedLocation" class="location-info">
                                         <strong>📍 Выбранная локация:</strong><br>
                                         Широта: {{ selectedLocation.lat.toFixed(6) }}<br>
                                         Долгота: {{ selectedLocation.lng.toFixed(6) }}
@@ -1068,7 +1236,6 @@
                                         :min="getCurrentDateTime()"
                                         class="filter-select"
                                         style="width: 100%; margin: 5px 0;"
-                                        title="Выберите время начала тренировки"
                                     />
                                 </div>
                                 <div class="form-group">
@@ -1081,7 +1248,6 @@
                                         :min="newTraining.startTime"
                                         class="filter-select"
                                         style="width: 100%; margin: 5px 0;"
-                                        title="Выберите время окончания тренировки"
                                     />
                                 </div>
                                 <div class="quiz-navigation">
@@ -1102,7 +1268,6 @@
                                         placeholder="Опишите вашу тренировку, что нужно взять с собой, уровень подготовки..."
                                         class="filter-select"
                                         style="width: 100%; height: 100px; margin: 5px 0; resize: vertical;"
-                                        title="Введите описание тренировки"
                                     ></textarea>
                                 </div>
 
@@ -1111,12 +1276,8 @@
                                         <input type="checkbox" v-model="newTraining.autoAccept" name="autoAccept" />
                                         Автоматически принимать участников
                                     </label>
-                                    <small style="display: block; color: #666; margin-top: 5px;">
-                                        Если отключено, вы будете подтверждать каждого участника вручную
-                                    </small>
                                 </div>
 
-                                <!-- Имя для не-Telegram пользователей -->
                                 <div v-if="!telegramUser" class="form-group">
                                     <label for="userName" class="form-label">Ваше имя:</label>
                                     <input
@@ -1126,7 +1287,6 @@
                                         placeholder="Введите ваше имя"
                                         class="filter-select"
                                         style="width: 100%; margin: 5px 0;"
-                                        title="Введите ваше имя"
                                     />
                                 </div>
 
