@@ -33,6 +33,19 @@
             z-index: 1000;
             max-width: 300px;
         }
+        .events-panel {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            z-index: 1000;
+            max-width: 300px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
         .quiz-overlay {
             position: fixed;
             top: 0;
@@ -109,6 +122,35 @@
         .quiz-navigation button {
             flex: 1;
         }
+        .training-item, .event-item {
+            background: #f8f9fa;
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 5px;
+            border-left: 4px solid #007bff;
+        }
+        .premium-training {
+            border-left: 4px solid #ffc107;
+            background: #fff3cd;
+        }
+        .sport-filter {
+            margin: 10px 0;
+        }
+        .tab-buttons {
+            display: flex;
+            margin-bottom: 10px;
+        }
+        .tab-button {
+            flex: 1;
+            padding: 8px;
+            background: #e9ecef;
+            border: none;
+            cursor: pointer;
+        }
+        .tab-button.active {
+            background: #007bff;
+            color: white;
+        }
     </style>
 </head>
 <body>
@@ -125,6 +167,7 @@
                 const map = ref(null);
                 const userLocation = ref(null);
                 const trainings = ref([]);
+                const events = ref([]);
                 const showQuiz = ref(false);
                 const quizStep = ref(1);
                 const isSelectingLocation = ref(false);
@@ -132,6 +175,9 @@
                 const selectionMap = ref(null);
                 const selectionMarker = ref(null);
                 const creatingTraining = ref(false);
+                const activeTab = ref('trainings');
+                const selectedSport = ref('');
+                const premiumTraining = ref(null);
 
                 // Данные новой тренировки
                 const newTraining = ref({
@@ -151,7 +197,10 @@
                     photo_url: null
                 });
 
-                const BACKEND_URL = 'http://localhost:5000';
+                // URL бэкенда на PythonAnywhere - ЗАМЕНИТЕ НА СВОЙ
+                const BACKEND_URL = 'https://skienbear.pythonanywhere.com/'; // ЗАМЕНИТЕ!
+                // Для тестирования можно использовать локальный сервер:
+                // const BACKEND_URL = 'http://localhost:5000';
 
                 // Инициализация основной карты
                 const initMap = () => {
@@ -181,17 +230,24 @@
                                     .bindPopup('Ваше местоположение')
                                     .openPopup();
 
-                                // Загружаем тренировки рядом
+                                // Загружаем тренировки и события
                                 loadTrainings();
+                                loadEvents();
+                                loadPremiumTraining();
                             },
                             (error) => {
                                 console.warn('Geolocation error:', error);
-                                loadTrainings(); // Все равно загружаем тренировки
+                                // Все равно загружаем данные
+                                loadTrainings();
+                                loadEvents();
+                                loadPremiumTraining();
                             }
                         );
                     } else {
                         console.warn('Geolocation not supported');
                         loadTrainings();
+                        loadEvents();
+                        loadPremiumTraining();
                     }
 
                     return mapInstance;
@@ -203,9 +259,12 @@
                         const lat = userLocation.value?.lat || 55.7558;
                         const lng = userLocation.value?.lng || 37.6173;
 
-                        const response = await fetch(
-                            `${BACKEND_URL}/api/trainings?lat=${lat}&lng=${lng}&radius=10`
-                        );
+                        let url = `${BACKEND_URL}/api/trainings?lat=${lat}&lng=${lng}&radius=10`;
+                        if (selectedSport.value) {
+                            url += `&sport=${selectedSport.value}`;
+                        }
+
+                        const response = await fetch(url);
 
                         if (response.ok) {
                             const result = await response.json();
@@ -213,39 +272,224 @@
                                 trainings.value = result.data;
                                 updateMapMarkers();
                             }
+                        } else {
+                            console.error('Server error:', response.status);
                         }
                     } catch (error) {
                         console.error('Error loading trainings:', error);
+                        // Fallback: показываем mock данные если сервер недоступен
+                        trainings.value = getMockTrainings();
                     }
+                };
+
+                // Загрузка событий
+                const loadEvents = async () => {
+                    try {
+                        const lat = userLocation.value?.lat || 55.7558;
+                        const lng = userLocation.value?.lng || 37.6173;
+
+                        let url = `${BACKEND_URL}/api/events?lat=${lat}&lng=${lng}&radius=50`;
+                        if (selectedSport.value) {
+                            url += `&sport=${selectedSport.value}`;
+                        }
+
+                        const response = await fetch(url);
+
+                        if (response.ok) {
+                            const result = await response.json();
+                            if (result.status === "success") {
+                                events.value = result.data;
+                                updateMapMarkers();
+                            }
+                        } else {
+                            console.error('Server error:', response.status);
+                        }
+                    } catch (error) {
+                        console.error('Error loading events:', error);
+                        // Fallback: показываем mock события
+                        events.value = getMockEvents();
+                    }
+                };
+
+                // Загрузка премиум тренировки
+                const loadPremiumTraining = async () => {
+                    try {
+                        const response = await fetch(`${BACKEND_URL}/api/premium-training`);
+
+                        if (response.ok) {
+                            const result = await response.json();
+                            if (result.status === "success") {
+                                premiumTraining.value = result.data;
+                                updateMapMarkers();
+                            }
+                        }
+                    } catch (error) {
+                        console.error('Error loading premium training:', error);
+                        // Fallback: mock премиум тренировка
+                        premiumTraining.value = getMockPremiumTraining();
+                    }
+                };
+
+                // Mock данные для fallback
+                const getMockTrainings = () => {
+                    return [
+                        {
+                            id: "training_1",
+                            title: "Утренняя пробежка в Парке Горького",
+                            sport: "бег",
+                            lat: 55.731,
+                            lng: 37.603,
+                            start_time: new Date(Date.now() + 86400000).toISOString(),
+                            comment: "Присоединяйтесь к утренней пробежке!",
+                            user_name: "Алексей",
+                            distance: 0.5,
+                            participants_count: 3
+                        },
+                        {
+                            id: "training_2",
+                            title: "Велосипедная прогулка по Воробьевым горам",
+                            sport: "велоспорт",
+                            lat: 55.710,
+                            lng: 37.553,
+                            start_time: new Date(Date.now() + 172800000).toISOString(),
+                            comment: "Катаемся по живописным маршрутам",
+                            user_name: "Мария",
+                            distance: 1.2,
+                            participants_count: 5
+                        }
+                    ];
+                };
+
+                const getMockEvents = () => {
+                    return [
+                        {
+                            id: 1,
+                            title: "Московский марафон 2024",
+                            sport: "бег",
+                            description: "Ежегодный осенний марафон через центр Москвы",
+                            date: "2024-09-15",
+                            location: "Москва, Воробьевы горы",
+                            lat: 55.710,
+                            lng: 37.553
+                        },
+                        {
+                            id: 2,
+                            title: "Ночной велопробег",
+                            sport: "велоспорт",
+                            description: "Ночная велопрогулка по освещенным улицам города",
+                            date: "2024-10-20",
+                            location: "Москва, Парк Горького",
+                            lat: 55.731,
+                            lng: 37.603
+                        }
+                    ];
+                };
+
+                const getMockPremiumTraining = () => {
+                    return {
+                        id: "premium_1",
+                        title: "🔥 Премиум: Беговой клуб в Парке Горького",
+                        description: "Элитная беговая группа с профессиональным тренером",
+                        sport: "бег",
+                        lat: 55.731,
+                        lng: 37.603,
+                        start_time: new Date(Date.now() + 86400000).toISOString(),
+                        end_time: new Date(Date.now() + 86400000 + 7200000).toISOString(),
+                        comment: "Присоединяйтесь к нашей премиум группе! Профессиональный тренер, индивидуальный подход.",
+                        auto_accept: true,
+                        user_name: "Профессиональный тренер",
+                        is_premium: true,
+                        participants_count: 12
+                    };
                 };
 
                 // Обновление маркеров на карте
                 const updateMapMarkers = () => {
                     if (!map.value) return;
 
-                    // Очищаем существующие маркеры (кроме пользователя)
+                    // Очищаем существующие маркеры
                     map.value.eachLayer((layer) => {
-                        if (layer instanceof L.Marker && layer !== selectionMarker.value) {
+                        if (layer instanceof L.Marker) {
                             map.value.removeLayer(layer);
                         }
                     });
+
+                    // Добавляем маркер пользователя
+                    if (userLocation.value) {
+                        L.marker([userLocation.value.lat, userLocation.value.lng])
+                            .addTo(map.value)
+                            .bindPopup('Ваше местоположение')
+                            .openPopup();
+                    }
 
                     // Добавляем маркеры тренировок
                     trainings.value.forEach(training => {
                         const marker = L.marker([training.lat, training.lng])
                             .addTo(map.value)
                             .bindPopup(`
-                                <div>
-                                    <h5>${training.title}</h5>
+                                <div style="min-width: 200px;">
+                                    <h6>${training.title}</h6>
                                     <p><strong>Спорт:</strong> ${training.sport}</p>
                                     <p><strong>Время:</strong> ${new Date(training.start_time).toLocaleString()}</p>
+                                    <p><strong>Организатор:</strong> ${training.user_name}</p>
                                     ${training.comment ? `<p><strong>Описание:</strong> ${training.comment}</p>` : ''}
-                                    <button onclick="app.joinTraining('${training.id}')" class="location-btn">
+                                    <p><strong>Участников:</strong> ${training.participants_count || 0}</p>
+                                    <button onclick="appComponent.joinTraining('${training.id}')"
+                                            style="width: 100%; padding: 8px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">
                                         Присоединиться
                                     </button>
                                 </div>
                             `);
                     });
+
+                    // Добавляем маркеры событий
+                    events.value.forEach(event => {
+                        const marker = L.marker([event.lat, event.lng], {
+                            icon: L.divIcon({
+                                className: 'event-marker',
+                                html: '🏆',
+                                iconSize: [30, 30]
+                            })
+                        })
+                        .addTo(map.value)
+                        .bindPopup(`
+                            <div style="min-width: 200px;">
+                                <h6 style="color: #dc3545;">${event.title}</h6>
+                                <p><strong>Спорт:</strong> ${event.sport}</p>
+                                <p><strong>Дата:</strong> ${event.date}</p>
+                                <p><strong>Место:</strong> ${event.location}</p>
+                                <p><strong>Описание:</strong> ${event.description}</p>
+                                <button style="width: 100%; padding: 8px; background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                                    Узнать больше
+                                </button>
+                            </div>
+                        `);
+                    });
+
+                    // Добавляем премиум тренировку
+                    if (premiumTraining.value) {
+                        const marker = L.marker([premiumTraining.value.lat, premiumTraining.value.lng], {
+                            icon: L.divIcon({
+                                className: 'premium-marker',
+                                html: '🔥',
+                                iconSize: [30, 30]
+                            })
+                        })
+                        .addTo(map.value)
+                        .bindPopup(`
+                            <div style="min-width: 200px;">
+                                <h6 style="color: #ffc107;">${premiumTraining.value.title}</h6>
+                                <p><strong>Спорт:</strong> ${premiumTraining.value.sport}</p>
+                                <p><strong>Время:</strong> ${new Date(premiumTraining.value.start_time).toLocaleString()}</p>
+                                <p><strong>Описание:</strong> ${premiumTraining.value.comment}</p>
+                                <p><strong>Участников:</strong> ${premiumTraining.value.participants_count || 12}</p>
+                                <button onclick="appComponent.joinTraining('${premiumTraining.value.id}')"
+                                        style="width: 100%; padding: 8px; background: #ffc107; color: black; border: none; border-radius: 4px; cursor: pointer;">
+                                    Присоединиться к премиум группе
+                                </button>
+                            </div>
+                        `);
+                    }
                 };
 
                 // Инициализация карты для выбора локации
@@ -321,6 +565,11 @@
                     if (userLocation.value) {
                         selectedLocation.value = { ...userLocation.value };
                         console.log('Using current location:', selectedLocation.value);
+
+                        // Центрируем карту выбора на текущем местоположении
+                        if (selectionMap.value) {
+                            selectionMap.value.setView([userLocation.value.lat, userLocation.value.lng], 14);
+                        }
                     } else {
                         alert('Не удалось определить ваше местоположение');
                     }
@@ -484,7 +733,7 @@
                         let errorMessage = '❌ Не удалось создать тренировку';
 
                         if (error.message.includes('Network Error') || error.message.includes('Failed to fetch')) {
-                            errorMessage += ': проблемы с подключением к серверу. Убедитесь, что сервер запущен на localhost:5000';
+                            errorMessage += ': проблемы с подключением к серверу. Убедитесь, что сервер запущен и CORS настроен правильно.';
                         } else {
                             errorMessage += ': ' + error.message;
                         }
@@ -524,16 +773,30 @@
                     }
                 };
 
+                const refreshData = () => {
+                    loadTrainings();
+                    loadEvents();
+                    loadPremiumTraining();
+                };
+
                 // Инициализация при загрузке
                 onMounted(() => {
                     console.log('App mounted, initializing map...');
                     map.value = initMap();
                 });
 
+                // Наблюдаем за изменением фильтра спорта
+                watch(selectedSport, () => {
+                    loadTrainings();
+                    loadEvents();
+                });
+
                 return {
                     map,
                     userLocation,
                     trainings,
+                    events,
+                    premiumTraining,
                     showQuiz,
                     quizStep,
                     isSelectingLocation,
@@ -542,12 +805,15 @@
                     newTraining,
                     creatingTraining,
                     telegramUser,
+                    activeTab,
+                    selectedSport,
                     useCurrentLocation,
                     startLocationSelection,
                     nextQuizStep,
                     prevQuizStep,
                     createTraining,
-                    joinTraining
+                    joinTraining,
+                    refreshData
                 };
             },
             template: `
@@ -555,14 +821,97 @@
                     <!-- Основная карта -->
                     <div id="map"></div>
 
-                    <!-- Панель управления -->
+                    <!-- Панель управления слева -->
                     <div class="control-panel">
                         <h5>SportEvents Map</h5>
                         <button @click="showQuiz = true" class="location-btn">
                             ➕ Создать тренировку
                         </button>
+                        <button @click="refreshData" class="location-btn" style="background: #28a745;">
+                            🔄 Обновить
+                        </button>
                         <div v-if="userLocation" style="margin-top: 10px; font-size: 12px; color: #666;">
                             📍 Ваше местоположение определено
+                        </div>
+                    </div>
+
+                    <!-- Панель событий и тренировок справа -->
+                    <div class="events-panel">
+                        <h5>Активности</h5>
+
+                        <!-- Фильтр по спорту -->
+                        <div class="sport-filter">
+                            <select v-model="selectedSport" class="form-control" style="padding: 8px; font-size: 14px;">
+                                <option value="">Все виды спорта</option>
+                                <option value="бег">Бег</option>
+                                <option value="велоспорт">Велоспорт</option>
+                                <option value="футбол">Футбол</option>
+                                <option value="баскетбол">Баскетбол</option>
+                                <option value="теннис">Теннис</option>
+                                <option value="йога">Йога</option>
+                                <option value="плавание">Плавание</option>
+                            </select>
+                        </div>
+
+                        <!-- Табы -->
+                        <div class="tab-buttons">
+                            <button
+                                @click="activeTab = 'trainings'"
+                                :class="['tab-button', { active: activeTab === 'trainings' }]"
+                            >
+                                Тренировки ({{ trainings.length }})
+                            </button>
+                            <button
+                                @click="activeTab = 'events'"
+                                :class="['tab-button', { active: activeTab === 'events' }]"
+                            >
+                                События ({{ events.length }})
+                            </button>
+                        </div>
+
+                        <!-- Список тренировок -->
+                        <div v-if="activeTab === 'trainings'">
+                            <!-- Премиум тренировка -->
+                            <div v-if="premiumTraining" class="training-item premium-training">
+                                <h6>🔥 {{ premiumTraining.title }}</h6>
+                                <p><strong>Спорт:</strong> {{ premiumTraining.sport }}</p>
+                                <p><strong>Время:</strong> {{ new Date(premiumTraining.start_time).toLocaleString() }}</p>
+                                <p><strong>Участников:</strong> {{ premiumTraining.participants_count || 12 }}</p>
+                                <button @click="joinTraining(premiumTraining.id)" class="location-btn" style="background: #ffc107; color: black; padding: 8px;">
+                                    Присоединиться
+                                </button>
+                            </div>
+
+                            <!-- Обычные тренировки -->
+                            <div v-for="training in trainings" :key="training.id" class="training-item">
+                                <h6>{{ training.title }}</h6>
+                                <p><strong>Спорт:</strong> {{ training.sport }}</p>
+                                <p><strong>Время:</strong> {{ new Date(training.start_time).toLocaleString() }}</p>
+                                <p><strong>Организатор:</strong> {{ training.user_name }}</p>
+                                <p><strong>Участников:</strong> {{ training.participants_count || 0 }}</p>
+                                <button @click="joinTraining(training.id)" class="location-btn" style="padding: 8px;">
+                                    Присоединиться
+                                </button>
+                            </div>
+
+                            <div v-if="trainings.length === 0" style="text-align: center; color: #666; padding: 20px;">
+                                Нет доступных тренировок
+                            </div>
+                        </div>
+
+                        <!-- Список событий -->
+                        <div v-if="activeTab === 'events'">
+                            <div v-for="event in events" :key="event.id" class="event-item">
+                                <h6 style="color: #dc3545;">{{ event.title }}</h6>
+                                <p><strong>Спорт:</strong> {{ event.sport }}</p>
+                                <p><strong>Дата:</strong> {{ event.date }}</p>
+                                <p><strong>Место:</strong> {{ event.location }}</p>
+                                <p>{{ event.description }}</p>
+                            </div>
+
+                            <div v-if="events.length === 0" style="text-align: center; color: #666; padding: 20px;">
+                                Нет доступных событий
+                            </div>
                         </div>
                     </div>
 
@@ -722,7 +1071,10 @@
         };
 
         const app = createApp(App);
-        app.mount('#app');
+        const appComponent = app.mount('#app');
+
+        // Делаем appComponent глобально доступным для обработчиков в popup
+        window.appComponent = appComponent;
     </script>
 </body>
 </html>
